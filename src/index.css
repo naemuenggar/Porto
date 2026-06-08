@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Dark theme: native form controls, scrollbars, etc. */
+    color-scheme: dark;
+  }
+
+  body {
+    /* Req 10.4: body text minimum 16px */
+    font-size: 16px;
+    background-color: theme('colors.base');
+    color: theme('colors.ink');
+    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+      Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * The Navbar is fixed at the top of the viewport (Req 1.3), so anchor-scroll
+   * targets must be offset by its height to keep each section's heading from
+   * being hidden beneath the bar when navigated to (Req 1.2, 2.5).
+   */
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+}

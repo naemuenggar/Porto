@@ -1,0 +1,138 @@
+import { useState } from 'react';
+import { SiGithub } from 'react-icons/si';
+import { FaLinkedin } from 'react-icons/fa';
+
+import { ExternalLink } from './ExternalLink';
+import { scrollToSection } from '../lib/scroll';
+
+/**
+ * Hero / introductory section (Requirement 2).
+ *
+ * Renders the candidate identity (name, role, summary), the two primary
+ * action buttons ("View Projects" and "Download CV"), and the GitHub /
+ * LinkedIn social links. All content is supplied via props so the section
+ * stays data-driven and testable.
+ *
+ * Behavior:
+ * - Displays name, role, and summary exactly as provided (Req 2.1–2.3).
+ * - "View Projects" calls `scrollToSection('projects')` (Req 2.4, 2.5).
+ * - "Download CV" triggers a download when `cvUrl` is a usable destination
+ *   (Req 2.6); when `cvUrl` is null/empty it shows an inline error indication
+ *   and leaves the page unchanged — no navigation or reload (Req 2.7).
+ * - GitHub / LinkedIn links open in a new tab via the shared `ExternalLink`
+ *   helper (Req 2.8, 2.9).
+ *
+ * Styling uses only palette tokens (`base`, `surface`, `ink`, `accent`), hover
+ * changes on buttons, an accent focus ring, and transitions bounded within
+ * 100–500ms (Req 10.1, 10.2, 10.3, 10.5).
+ */
+export interface HeroProps {
+  name: string;
+  role: string;
+  summary: string;
+  /** CV document URL, or `null`/empty when no CV is configured. */
+  cvUrl: string | null;
+  githubUrl: string | null;
+  linkedinUrl: string | null;
+}
+
+/** Shared button styling: palette tokens, hover change, accent focus ring. */
+const BUTTON_BASE =
+  'inline-flex items-center justify-center rounded-md px-6 py-3 text-base ' +
+  'font-medium transition-colors duration-200 focus:outline-none ' +
+  'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ' +
+  'focus-visible:ring-offset-base';
+
+/** Primary (filled) button variant. */
+const BUTTON_PRIMARY = `${BUTTON_BASE} bg-accent text-ink hover:bg-accent/80`;
+
+/** Secondary (outlined) button variant. */
+const BUTTON_SECONDARY = `${BUTTON_BASE} border border-ink text-ink hover:bg-surface`;
+
+/**
+ * A destination is usable only when it is a non-empty string once surrounding
+ * whitespace is removed.
+ */
+function hasDestination(url: string | null): url is string {
+  return typeof url === 'string' && url.trim().length > 0;
+}
+
+export function Hero({
+  name,
+  role,
+  summary,
+  cvUrl,
+  githubUrl,
+  linkedinUrl,
+}: HeroProps): JSX.Element {
+  // Inline error shown only on the CV-unavailable path (Req 2.7).
+  const [cvError, setCvError] = useState<string | null>(null);
+
+  const handleViewProjects = (): void => {
+    // Scroll the Projects section into view (Req 2.4, 2.5).
+    scrollToSection('projects');
+  };
+
+  const handleDownloadCv = (): void => {
+    if (!hasDestination(cvUrl)) {
+      // CV unavailable: show an inline error and leave the page unchanged.
+      // No navigation, no reload (Req 2.7).
+      setCvError('CV is currently unavailable. Please try again later.');
+      return;
+    }
+
+    // Clear any prior error and initiate the download via a transient anchor
+    // carrying the `download` attribute (Req 2.6).
+    setCvError(null);
+    const anchor = document.createElement('a');
+    anchor.href = cvUrl;
+    anchor.download = '';
+    anchor.rel = 'noopener noreferrer';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  };
+
+  return (
+    <section
+      id="home"
+      className="flex min-h-screen flex-col items-center justify-center gap-6 bg-base px-6 py-24 text-center text-ink sm:px-10 lg:px-20"
+    >
+      <h1 className="text-4xl font-bold tracking-tight sm:text-5xl break-words">{name}</h1>
+
+      <p className="text-xl font-medium text-accent sm:text-2xl">{role}</p>
+
+      <p className="max-w-2xl text-base leading-relaxed text-ink/80 break-words">{summary}</p>
+
+      <div className="flex flex-wrap items-center justify-center gap-4">
+        <button type="button" onClick={handleViewProjects} className={BUTTON_PRIMARY}>
+          View Projects
+        </button>
+
+        <button type="button" onClick={handleDownloadCv} className={BUTTON_SECONDARY}>
+          Download CV
+        </button>
+      </div>
+
+      {cvError !== null && (
+        <p role="alert" className="text-base font-medium text-accent">
+          {cvError}
+        </p>
+      )}
+
+      <div className="flex items-center justify-center gap-6 pt-2">
+        <ExternalLink href={githubUrl} aria-label="GitHub profile">
+          <SiGithub aria-hidden="true" className="h-5 w-5" />
+          <span>GitHub</span>
+        </ExternalLink>
+
+        <ExternalLink href={linkedinUrl} aria-label="LinkedIn profile">
+          <FaLinkedin aria-hidden="true" className="h-5 w-5" />
+          <span>LinkedIn</span>
+        </ExternalLink>
+      </div>
+    </section>
+  );
+}
+
+export default Hero;
