@@ -7,7 +7,7 @@ export default {
         base: '#0F172A', // dark navy (page background)
         surface: '#1E293B', // lighter dark (cards/surfaces)
         ink: '#E2E8F0', // light slate (primary text)
-        accent: '#3B82F6', // single blue accent
+        accent: '#6366F1', // modern indigo (blue/purple accent)
       },
     },
   },

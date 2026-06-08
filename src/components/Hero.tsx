@@ -36,18 +36,18 @@ export interface HeroProps {
   linkedinUrl: string | null;
 }
 
-/** Shared button styling: palette tokens, hover change, accent focus ring. */
+/** Shared button styling: modern radius, strong focus ring, smooth transition. */
 const BUTTON_BASE =
-  'inline-flex items-center justify-center rounded-md px-6 py-3 text-base ' +
-  'font-medium transition-colors duration-200 focus:outline-none ' +
+  'inline-flex items-center justify-center rounded-lg px-6 py-3 text-base ' +
+  'font-semibold transition-all duration-200 focus:outline-none ' +
   'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ' +
   'focus-visible:ring-offset-base';
 
-/** Primary (filled) button variant. */
-const BUTTON_PRIMARY = `${BUTTON_BASE} bg-accent text-ink hover:bg-accent/80`;
+/** Primary (solid, most prominent) button — "View Projects". */
+const BUTTON_PRIMARY = `${BUTTON_BASE} bg-accent text-white shadow-md hover:brightness-110`;
 
-/** Secondary (outlined) button variant. */
-const BUTTON_SECONDARY = `${BUTTON_BASE} border border-ink text-ink hover:bg-surface`;
+/** Secondary (outlined) button — "Download CV". */
+const BUTTON_SECONDARY = `${BUTTON_BASE} border-2 border-accent text-accent hover:bg-accent/15`;
 
 /**
  * A destination is usable only when it is a non-empty string once surrounding
@@ -96,15 +96,21 @@ export function Hero({
   return (
     <section
       id="home"
-      className="flex min-h-screen flex-col items-center justify-center gap-6 bg-base px-6 py-24 text-center text-ink sm:px-10 lg:px-20"
+      className="flex min-h-screen flex-col items-center justify-center gap-5 bg-base px-6 py-24 text-center text-ink sm:px-10 lg:px-20"
     >
-      <h1 className="text-4xl font-bold tracking-tight sm:text-5xl break-words">{name}</h1>
+      <h1 className="max-w-4xl text-4xl font-extrabold tracking-tight text-ink break-words sm:text-5xl lg:text-6xl">
+        {name}
+      </h1>
 
-      <p className="text-xl font-medium text-accent sm:text-2xl">{role}</p>
+      <p className="text-2xl font-semibold tracking-wide text-accent sm:text-3xl">
+        {role}
+      </p>
 
-      <p className="max-w-2xl text-base leading-relaxed text-ink/80 break-words">{summary}</p>
+      <p className="max-w-2xl text-base leading-relaxed text-ink/70 break-words sm:text-lg">
+        {summary}
+      </p>
 
-      <div className="flex flex-wrap items-center justify-center gap-4">
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
         <button type="button" onClick={handleViewProjects} className={BUTTON_PRIMARY}>
           View Projects
         </button>
@@ -120,7 +126,7 @@ export function Hero({
         </p>
       )}
 
-      <div className="flex items-center justify-center gap-6 pt-2">
+      <div className="mt-2 flex items-center justify-center gap-6">
         <ExternalLink href={githubUrl} aria-label="GitHub profile">
           <SiGithub aria-hidden="true" className="h-5 w-5" />
           <span>GitHub</span>

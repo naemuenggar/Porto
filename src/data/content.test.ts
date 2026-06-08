@@ -124,7 +124,7 @@ describe('content integrity — profile pinned text', () => {
 
   it('has a non-empty hero summary mentioning web development', () => {
     expect(profile.summary.length).toBeGreaterThan(0);
-    expect(profile.summary).toContain('pengembangan aplikasi web');
+    expect(profile.summary).toContain('website modern');
   });
 });
 

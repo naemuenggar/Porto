@@ -60,7 +60,7 @@ export const profile = {
   name: 'Naemu Enggar Mahcaya',
   role: 'Web Developer',
   summary:
-    'Mahasiswa Teknologi Informasi yang memiliki minat pada pengembangan aplikasi web, implementasi UI, integrasi database, dan pembuatan website yang responsif, fungsional, serta mudah digunakan. Terbiasa membangun project menggunakan teknologi modern seperti React, TypeScript, Laravel, MySQL, Supabase, dan Tailwind CSS.',
+    'Mahasiswa Teknologi Informasi yang fokus membangun website modern, responsif, dan user-friendly menggunakan React, Next.js, Vue 3, Laravel, Tailwind CSS, dan MySQL.',
 } as const;
 
 /** About section content — professional multi-paragraph profile. */

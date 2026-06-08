@@ -46,10 +46,8 @@ export interface ProjectCardProps {
 /** Maximum time (ms) to wait for the project image before falling back. */
 const IMAGE_LOAD_TIMEOUT_MS = 5000;
 
-/** Shared action-button styling: palette tokens, hover change, accent ring. */
-const ACTION_BUTTON_CLASSES =
-  'flex-1 justify-center rounded-md border border-ink px-4 py-2 text-base ' +
-  'font-medium hover:bg-surface hover:text-ink hover:no-underline';
+/** Layout classes shared by both card action buttons (variant adds the rest). */
+const ACTION_BUTTON_CLASSES = 'flex-1 justify-center text-base';
 
 export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
   const { title, description, techStack, imageUrl, githubUrl, liveDemoUrl } =
@@ -133,21 +131,23 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
             bottom so cards of differing heights align their actions. */}
         <div className="mt-auto flex gap-3 pt-2">
           <ExternalLink
-            href={githubUrl}
-            className={ACTION_BUTTON_CLASSES}
-            aria-label={`${title} GitHub repository`}
-          >
-            <SiGithub aria-hidden="true" className="h-5 w-5" />
-            <span>GitHub</span>
-          </ExternalLink>
-
-          <ExternalLink
             href={liveDemoUrl}
+            variant="primary"
             className={ACTION_BUTTON_CLASSES}
             aria-label={`${title} live demo`}
           >
             <FiExternalLink aria-hidden="true" className="h-5 w-5" />
             <span>Live Demo</span>
+          </ExternalLink>
+
+          <ExternalLink
+            href={githubUrl}
+            variant="secondary"
+            className={ACTION_BUTTON_CLASSES}
+            aria-label={`${title} GitHub repository`}
+          >
+            <SiGithub aria-hidden="true" className="h-5 w-5" />
+            <span>GitHub</span>
           </ExternalLink>
         </div>
       </div>

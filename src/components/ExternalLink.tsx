@@ -14,32 +14,57 @@ import type { ReactNode } from 'react';
  *   `aria-disabled="true"` that visibly indicates the link is unavailable and
  *   does NOT navigate when selected (Req 5.7, 8.5).
  *
- * Interactive styling uses only palette tokens (`accent` focus ring, hover
- * color/underline change) with a transition bounded within 100–500ms
- * (Req 10.2, 10.3, 10.5).
+ * The `variant` prop controls the visual treatment:
+ * - `plain` (default): a simple accent text link.
+ * - `primary`: a solid accent button with strong contrast (e.g. Live Demo).
+ * - `secondary`: an outlined accent button with a clear border (e.g. GitHub).
+ *
+ * Styling uses palette tokens (`accent`, `ink`, `base`) plus near-white text on
+ * solid buttons for contrast, an accent focus ring, and smooth transitions
+ * bounded within 100–500ms (Req 10.2, 10.3, 10.5).
  */
+export type ExternalLinkVariant = 'plain' | 'primary' | 'secondary';
+
 export interface ExternalLinkProps {
   /** Destination URL, or `null`/empty when no destination is configured. */
   href: string | null | undefined;
   /** Visible label / content of the link. */
   children: ReactNode;
+  /** Visual treatment. Defaults to `plain`. */
+  variant?: ExternalLinkVariant;
   /** Optional caller-supplied classes appended after the shared base classes. */
   className?: string;
   /** Optional accessible label override (e.g. for icon-only links). */
   'aria-label'?: string;
 }
 
-/** Shared transition + focus styling applied in both render modes. */
+/** Shared layout + focus styling applied across every variant and state. */
 const BASE_CLASSES =
-  'inline-flex items-center gap-2 rounded transition-colors duration-200 ' +
+  'inline-flex items-center gap-2 transition-all duration-200 ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ' +
   'focus-visible:ring-offset-2 focus-visible:ring-offset-base';
 
-/** Styling for an active, navigable link. */
-const ENABLED_CLASSES = 'text-accent hover:text-ink hover:underline cursor-pointer';
+/** Enabled styling per variant. */
+const ENABLED_CLASSES: Record<ExternalLinkVariant, string> = {
+  plain: 'rounded text-accent hover:text-ink hover:underline cursor-pointer',
+  primary:
+    'rounded-lg bg-accent px-5 py-2.5 font-semibold text-white shadow-md ' +
+    'hover:brightness-110 cursor-pointer',
+  secondary:
+    'rounded-lg border-2 border-accent px-5 py-2.5 font-semibold text-accent ' +
+    'hover:bg-accent/15 cursor-pointer',
+};
 
-/** Styling for a disabled/unavailable link. */
-const DISABLED_CLASSES = 'text-ink/40 cursor-not-allowed line-through';
+/** Disabled styling per variant — clearly muted, never error-like. */
+const DISABLED_CLASSES: Record<ExternalLinkVariant, string> = {
+  plain: 'rounded text-ink/40 cursor-not-allowed line-through',
+  primary:
+    'rounded-lg border-2 border-ink/20 px-5 py-2.5 font-semibold ' +
+    'text-ink/40 cursor-not-allowed',
+  secondary:
+    'rounded-lg border-2 border-ink/20 px-5 py-2.5 font-semibold ' +
+    'text-ink/40 cursor-not-allowed',
+};
 
 /**
  * A destination is considered configured only when it is a non-empty string
@@ -52,6 +77,7 @@ function hasDestination(href: string | null | undefined): href is string {
 export function ExternalLink({
   href,
   children,
+  variant = 'plain',
   className,
   'aria-label': ariaLabel,
 }: ExternalLinkProps): JSX.Element {
@@ -67,7 +93,7 @@ export function ExternalLink({
         aria-disabled="true"
         aria-label={ariaLabel}
         title="Link unavailable"
-        className={`${BASE_CLASSES} ${DISABLED_CLASSES}${extra}`}
+        className={`${BASE_CLASSES} ${DISABLED_CLASSES[variant]}${extra}`}
       >
         {children}
       </span>
@@ -80,7 +106,7 @@ export function ExternalLink({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={ariaLabel}
-      className={`${BASE_CLASSES} ${ENABLED_CLASSES}${extra}`}
+      className={`${BASE_CLASSES} ${ENABLED_CLASSES[variant]}${extra}`}
     >
       {children}
     </a>
