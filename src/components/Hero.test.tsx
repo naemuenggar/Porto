@@ -12,7 +12,7 @@ vi.mock('../lib/scroll', () => ({
 }));
 
 const NAME = 'Naemu Enggar Mahcaya';
-const ROLE = 'Web Developer & IT Student';
+const ROLE = 'Web Developer';
 const SUMMARY =
   'Mahasiswa Teknologi Informasi yang memiliki minat pada pengembangan aplikasi web, implementasi UI, integrasi database, dan pembuatan website yang responsif, fungsional, serta mudah digunakan. Terbiasa membangun project menggunakan teknologi modern seperti React, TypeScript, Laravel, MySQL, Supabase, dan Tailwind CSS.';
 const GITHUB_URL = 'https://github.com/example';

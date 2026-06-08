@@ -35,18 +35,18 @@ describe('content integrity — counts', () => {
   });
 
   it('has four About paragraphs', () => {
-    expect(about.paragraphs).toHaveLength(4);
+    expect(about.paragraphs).toHaveLength(5);
     for (const paragraph of about.paragraphs) {
       expect(paragraph.trim().length).toBeGreaterThan(0);
     }
   });
 
-  it('has three experience entries', () => {
-    expect(experience).toHaveLength(3);
+  it('has four experience entries', () => {
+    expect(experience).toHaveLength(4);
   });
 
-  it('has exactly 3 projects', () => {
-    expect(projects).toHaveLength(3);
+  it('has exactly 4 projects', () => {
+    expect(projects).toHaveLength(4);
   });
 });
 
@@ -59,9 +59,13 @@ describe('content integrity — skill labels', () => {
       'JavaScript',
       'TypeScript',
       'React',
+      'Vue 3',
       'Tailwind CSS',
       'Bootstrap',
+      'Inertia.js',
+      'Chart.js',
       'Responsive Design',
+      'Responsive Dashboard UI',
     ]);
   });
 
@@ -72,9 +76,14 @@ describe('content integrity — skill labels', () => {
     expect(backend?.skills.map((s) => s.name)).toEqual([
       'PHP',
       'Laravel',
+      'Laravel Breeze',
       'MySQL',
       'Supabase',
       'REST API Basic',
+      'Authentication',
+      'CRUD',
+      'Database Migration',
+      'Seeder',
     ]);
   });
 
@@ -83,8 +92,11 @@ describe('content integrity — skill labels', () => {
     expect(tools?.skills.map((s) => s.name)).toEqual([
       'Git',
       'GitHub',
-      'Vercel',
+      'Composer',
       'npm',
+      'Vite',
+      'Vercel',
+      'XAMPP',
       'Visual Studio Code',
     ]);
   });
@@ -107,7 +119,7 @@ describe('content integrity — profile pinned text', () => {
   });
 
   it('positions the candidate as a Web Developer', () => {
-    expect(profile.role).toBe('Web Developer & IT Student');
+    expect(profile.role).toBe('Web Developer');
   });
 
   it('has a non-empty hero summary mentioning web development', () => {
@@ -148,11 +160,30 @@ describe('content integrity — project pinned text (Req 5.2, 5.3, 5.4)', () => 
     );
     expect(project.techStack).toEqual(['Flutter', 'Dart']);
   });
+
+  it('pins the Admin Monitoring Dashboard project', () => {
+    const project = projects[3];
+    expect(project.title).toBe('Admin Monitoring Dashboard');
+    expect(project.techStack).toEqual([
+      'Laravel',
+      'Vue 3',
+      'Inertia.js',
+      'Tailwind CSS',
+      'MySQL',
+      'Laravel Breeze',
+      'Chart.js',
+    ]);
+    expect(project.githubUrl).toBe(
+      'https://github.com/naemuenggar/Laravel-Monitoring',
+    );
+    expect(project.liveDemoUrl).toBeNull();
+  });
 });
 
 describe('content integrity — experience entries (Req 6.2, 6.3)', () => {
-  it('contains exactly the three expected titles', () => {
+  it('contains exactly the four expected titles', () => {
     expect(experience.map((entry) => entry.title)).toEqual([
+      'Full-Stack Dashboard Development',
       'Web Development Project Experience',
       'Front-End & UI Implementation',
       'IT Student Learning Journey',

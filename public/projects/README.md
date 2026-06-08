@@ -7,3 +7,4 @@ Expected files:
 - `ecommerce.png` — screenshot for the "e-Commerce Website" project card.
 - `flutter.png` — screenshot for the "Mobile / Flutter App" project card.
 - `splitbill.png` — screenshot for the "SplitBillin – Split Bill App" project card.
+- `laravel.png` — screenshot for the "Admin Monitoring Dashboard" project card.

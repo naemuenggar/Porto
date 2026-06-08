@@ -12,8 +12,10 @@ import {
   SiJavascript,
   SiTypescript,
   SiReact,
+  SiVuedotjs,
   SiTailwindcss,
   SiBootstrap,
+  SiChartdotjs,
   SiPhp,
   SiLaravel,
   SiMysql,
@@ -22,13 +24,28 @@ import {
   SiGithub,
   SiVercel,
   SiNpm,
+  SiVite,
+  SiComposer,
   SiFlutter,
   SiDart,
 } from 'react-icons/si';
 import { FaPalette } from 'react-icons/fa';
-import { MdDevices, MdBugReport, MdSupportAgent } from 'react-icons/md';
+import {
+  MdDevices,
+  MdDashboard,
+  MdBugReport,
+  MdSupportAgent,
+} from 'react-icons/md';
 import { TbApi } from 'react-icons/tb';
 import { VscCode } from 'react-icons/vsc';
+import {
+  FiLink,
+  FiLock,
+  FiDatabase,
+  FiRefreshCw,
+  FiPackage,
+  FiServer,
+} from 'react-icons/fi';
 
 import type {
   ContactDetails,
@@ -41,7 +58,7 @@ import type {
 /** Hero/profile identity text (Req 2.1, 2.2, 2.3). */
 export const profile = {
   name: 'Naemu Enggar Mahcaya',
-  role: 'Web Developer & IT Student',
+  role: 'Web Developer',
   summary:
     'Mahasiswa Teknologi Informasi yang memiliki minat pada pengembangan aplikasi web, implementasi UI, integrasi database, dan pembuatan website yang responsif, fungsional, serta mudah digunakan. Terbiasa membangun project menggunakan teknologi modern seperti React, TypeScript, Laravel, MySQL, Supabase, dan Tailwind CSS.',
 } as const;
@@ -51,6 +68,7 @@ export const about = {
   paragraphs: [
     'Saya adalah mahasiswa Teknologi Informasi yang memiliki ketertarikan kuat pada pengembangan website dan aplikasi berbasis web. Saya fokus membangun aplikasi yang tidak hanya memiliki tampilan menarik, tetapi juga fungsional, responsif, dan nyaman digunakan oleh pengguna.',
     'Dalam proses belajar dan mengembangkan project, saya terbiasa mengerjakan bagian front-end seperti slicing UI, membuat layout responsive, membangun komponen reusable, serta menghubungkan tampilan dengan data. Selain itu, saya juga memiliki pengalaman menggunakan Laravel, MySQL, dan Supabase untuk kebutuhan backend sederhana, autentikasi, penyimpanan data, dan pengelolaan informasi.',
+    'Saya juga memiliki pengalaman membangun aplikasi full-stack sederhana menggunakan Laravel, Vue 3, Inertia.js, dan MySQL. Saya pernah mengembangkan dashboard admin dengan fitur autentikasi, manajemen user, pengelolaan data monitoring, laporan, chart, search, filter, pagination, serta layout dashboard yang responsive.',
     'Beberapa project yang saya kerjakan meliputi website e-commerce, aplikasi split bill, dashboard web application, dan aplikasi mobile sederhana. Dari project tersebut, saya belajar bagaimana merancang alur pengguna, mengelola data, memperbaiki bug, serta memastikan aplikasi dapat berjalan dengan baik ketika digunakan secara langsung.',
     'Saat ini saya terus mengembangkan kemampuan di bidang web development, terutama pada React, TypeScript, Laravel, database, dan deployment aplikasi. Saya terbuka untuk kesempatan magang atau kerja praktik di bidang Web Developer, Front-End Developer, atau IT Development.',
   ],
@@ -70,9 +88,13 @@ export const skillCategories: SkillCategory[] = [
       { name: 'JavaScript', Icon: SiJavascript },
       { name: 'TypeScript', Icon: SiTypescript },
       { name: 'React', Icon: SiReact },
+      { name: 'Vue 3', Icon: SiVuedotjs },
       { name: 'Tailwind CSS', Icon: SiTailwindcss },
       { name: 'Bootstrap', Icon: SiBootstrap },
+      { name: 'Inertia.js', Icon: FiLink },
+      { name: 'Chart.js', Icon: SiChartdotjs },
       { name: 'Responsive Design', Icon: MdDevices },
+      { name: 'Responsive Dashboard UI', Icon: MdDashboard },
     ],
   },
   {
@@ -80,9 +102,14 @@ export const skillCategories: SkillCategory[] = [
     skills: [
       { name: 'PHP', Icon: SiPhp },
       { name: 'Laravel', Icon: SiLaravel },
+      { name: 'Laravel Breeze', Icon: SiLaravel },
       { name: 'MySQL', Icon: SiMysql },
       { name: 'Supabase', Icon: SiSupabase },
       { name: 'REST API Basic', Icon: TbApi },
+      { name: 'Authentication', Icon: FiLock },
+      { name: 'CRUD', Icon: FiDatabase },
+      { name: 'Database Migration', Icon: FiRefreshCw },
+      { name: 'Seeder', Icon: FiPackage },
     ],
   },
   {
@@ -90,8 +117,11 @@ export const skillCategories: SkillCategory[] = [
     skills: [
       { name: 'Git', Icon: SiGit },
       { name: 'GitHub', Icon: SiGithub },
-      { name: 'Vercel', Icon: SiVercel },
+      { name: 'Composer', Icon: SiComposer },
       { name: 'npm', Icon: SiNpm },
+      { name: 'Vite', Icon: SiVite },
+      { name: 'Vercel', Icon: SiVercel },
+      { name: 'XAMPP', Icon: FiServer },
       { name: 'Visual Studio Code', Icon: VscCode },
     ],
   },
@@ -140,6 +170,23 @@ export const projects: Project[] = [
     githubUrl: 'https://github.com/naemuenggar/Dart-Queue',
     liveDemoUrl: null,
   },
+  {
+    title: 'Admin Monitoring Dashboard',
+    description:
+      'Aplikasi dashboard admin berbasis Laravel untuk menampilkan ringkasan data, mengelola user, mengelola data monitoring/product, melihat laporan, serta memantau aktivitas melalui tabel dan chart sederhana.',
+    techStack: [
+      'Laravel',
+      'Vue 3',
+      'Inertia.js',
+      'Tailwind CSS',
+      'MySQL',
+      'Laravel Breeze',
+      'Chart.js',
+    ],
+    imageUrl: '/projects/laravel.png',
+    githubUrl: 'https://github.com/naemuenggar/Laravel-Monitoring',
+    liveDemoUrl: null,
+  },
 ];
 
 /**
@@ -149,6 +196,23 @@ export const projects: Project[] = [
  * are 1–500 chars.
  */
 export const experience: ExperienceEntry[] = [
+  {
+    id: 'fullstack-dashboard',
+    title: 'Full-Stack Dashboard Development',
+    subtitle: 'Laravel Monitoring Project',
+    description:
+      'Mengembangkan aplikasi dashboard admin berbasis Laravel, Vue 3, Inertia.js, dan MySQL untuk kebutuhan monitoring data. Project ini mencakup fitur autentikasi, dashboard statistik, manajemen user, pengelolaan data monitoring/product, laporan, settings, chart sederhana, search, filter, pagination, dan layout dashboard yang responsive.',
+    highlights: [
+      'Membangun dashboard admin menggunakan Laravel dan Vue 3.',
+      'Menggunakan Inertia.js sebagai penghubung antara backend Laravel dan frontend Vue.',
+      'Membuat fitur CRUD untuk user dan monitoring data.',
+      'Menggunakan MySQL, migration, dan seeder untuk pengelolaan database.',
+      'Menambahkan chart menggunakan Chart.js.',
+      'Membuat tampilan dashboard modern dengan Tailwind CSS.',
+      'Mengimplementasikan authentication menggunakan Laravel Breeze.',
+    ],
+    sortKey: 4,
+  },
   {
     id: 'web-development-projects',
     title: 'Web Development Project Experience',

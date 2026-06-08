@@ -45,6 +45,20 @@ const EXPECTED_PROJECTS = [
       'Aplikasi mobile sederhana yang dibuat menggunakan Flutter untuk latihan implementasi UI, navigasi halaman, dan integrasi data.',
     techStack: ['Flutter', 'Dart'],
   },
+  {
+    title: 'Admin Monitoring Dashboard',
+    description:
+      'Aplikasi dashboard admin berbasis Laravel untuk menampilkan ringkasan data, mengelola user, mengelola data monitoring/product, melihat laporan, serta memantau aktivitas melalui tabel dan chart sederhana.',
+    techStack: [
+      'Laravel',
+      'Vue 3',
+      'Inertia.js',
+      'Tailwind CSS',
+      'MySQL',
+      'Laravel Breeze',
+      'Chart.js',
+    ],
+  },
 ] as const;
 
 describe('Projects — pinned card content (Req 5.2, 5.3, 5.4)', () => {
@@ -70,13 +84,13 @@ describe('Projects — pinned card content (Req 5.2, 5.3, 5.4)', () => {
     }
   });
 
-  it('renders exactly three project cards', () => {
+  it('renders exactly four project cards', () => {
     render(<Projects projects={projects} />);
 
     // Each card is identified by its title heading (level 3). Tech-stack
     // badges are also list items, so count headings rather than list items.
     const cardTitles = screen.getAllByRole('heading', { level: 3 });
-    expect(cardTitles).toHaveLength(3);
+    expect(cardTitles).toHaveLength(4);
   });
 });
 
