@@ -51,7 +51,7 @@ const ENABLED_CLASSES: Record<ExternalLinkVariant, string> = {
     'rounded-lg bg-accent px-5 py-2.5 font-semibold text-white shadow-md ' +
     'hover:brightness-110 cursor-pointer',
   secondary:
-    'rounded-lg border-2 border-accent px-5 py-2.5 font-semibold text-accent ' +
+    'rounded-lg border-2 border-accent px-5 py-2.5 font-semibold text-white ' +
     'hover:bg-accent/15 cursor-pointer',
 };
 
