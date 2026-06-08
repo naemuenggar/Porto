@@ -47,7 +47,7 @@ const BUTTON_BASE =
 const BUTTON_PRIMARY = `${BUTTON_BASE} bg-accent text-white shadow-md hover:brightness-110`;
 
 /** Secondary (outlined) button — "Download CV". */
-const BUTTON_SECONDARY = `${BUTTON_BASE} border-2 border-accent text-accent hover:bg-accent/15`;
+const BUTTON_SECONDARY = `${BUTTON_BASE} border-2 border-accent text-white hover:bg-accent/15`;
 
 /**
  * A destination is usable only when it is a non-empty string once surrounding
