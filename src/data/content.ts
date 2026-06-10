@@ -283,7 +283,7 @@ export const experience: ExperienceEntry[] = [
 export const links = {
   github: 'https://github.com/naemuenggar',
   linkedin: 'https://www.linkedin.com/in/naemu-enggar-mahacaya',
-  cv: null as string | null,
+  cv: '/CV.pdf' as string | null,
   email: 'naemuenggar@gmail.com',
   location: 'Indonesia',
 } as const;
