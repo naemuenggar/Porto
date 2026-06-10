@@ -203,6 +203,15 @@ export const projects: Project[] = [
     githubUrl: 'https://github.com/naemuenggar/civic-flow',
     liveDemoUrl: null,
   },
+  {
+    title: 'OmniDoc — Universal File Converter',
+    description:
+      'Suite konversi & edit dokumen yang berjalan 100% di sisi klien (browser). Mendukung konversi any-to-any (PDF, Word, PPT, Excel, gambar), OCR, dan tanda tangan PDF menggunakan WebAssembly & Web Workers — file tidak pernah meninggalkan perangkat pengguna.',
+    techStack: ['Vue 3', 'TypeScript', 'Vite', 'Pinia', 'Tailwind CSS', 'WebAssembly'],
+    imageUrl: '/projects/omnidoc.png',
+    githubUrl: 'https://github.com/naemuenggar/file-converter',
+    liveDemoUrl: 'https://omnidoc-os.vercel.app/',
+  },
 ];
 
 /**

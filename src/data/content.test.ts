@@ -45,8 +45,8 @@ describe('content integrity — counts', () => {
     expect(experience).toHaveLength(5);
   });
 
-  it('has exactly 5 projects', () => {
-    expect(projects).toHaveLength(5);
+  it('has exactly 6 projects', () => {
+    expect(projects).toHaveLength(6);
   });
 });
 
@@ -188,6 +188,23 @@ describe('content integrity — project pinned text (Req 5.2, 5.3, 5.4)', () => 
       'https://github.com/naemuenggar/civic-flow',
     );
     expect(project.liveDemoUrl).toBeNull();
+  });
+
+  it('pins the OmniDoc project', () => {
+    const project = projects[5];
+    expect(project.title).toBe('OmniDoc — Universal File Converter');
+    expect(project.techStack).toEqual([
+      'Vue 3',
+      'TypeScript',
+      'Vite',
+      'Pinia',
+      'Tailwind CSS',
+      'WebAssembly',
+    ]);
+    expect(project.githubUrl).toBe(
+      'https://github.com/naemuenggar/file-converter',
+    );
+    expect(project.liveDemoUrl).toBe('https://omnidoc-os.vercel.app/');
   });
 });
 

@@ -72,6 +72,12 @@ const EXPECTED_PROJECTS = [
       'Recharts',
     ],
   },
+  {
+    title: 'OmniDoc — Universal File Converter',
+    description:
+      'Suite konversi & edit dokumen yang berjalan 100% di sisi klien (browser). Mendukung konversi any-to-any (PDF, Word, PPT, Excel, gambar), OCR, dan tanda tangan PDF menggunakan WebAssembly & Web Workers — file tidak pernah meninggalkan perangkat pengguna.',
+    techStack: ['Vue 3', 'TypeScript', 'Vite', 'Pinia', 'Tailwind CSS', 'WebAssembly'],
+  },
 ] as const;
 
 describe('Projects — pinned card content (Req 5.2, 5.3, 5.4)', () => {
@@ -97,11 +103,11 @@ describe('Projects — pinned card content (Req 5.2, 5.3, 5.4)', () => {
     }
   });
 
-  it('renders exactly five project cards', () => {
+  it('renders exactly six project cards', () => {
     render(<Projects projects={projects} />);
 
     const cardTitles = screen.getAllByRole('heading', { level: 3 });
-    expect(cardTitles).toHaveLength(5);
+    expect(cardTitles).toHaveLength(6);
   });
 });
 

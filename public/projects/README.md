@@ -9,3 +9,4 @@ Expected files:
 - `splitbill.png` — screenshot for the "SplitBillin – Split Bill App" project card.
 - `laravel.png` — screenshot for the "Admin Monitoring Dashboard" project card.
 - `civic.png` — screenshot for the "CivicFlow — Public Issue Reporting" project card.
+- `omnidoc.png` — screenshot for the "OmniDoc — Universal File Converter" project card.
