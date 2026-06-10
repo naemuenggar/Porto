@@ -213,6 +213,21 @@ export const projects: Project[] = [
  */
 export const experience: ExperienceEntry[] = [
   {
+    id: 'civicflow-platform',
+    title: 'Fullstack Web Platform Development',
+    subtitle: 'CivicFlow Project',
+    description:
+      'Merancang dan membangun platform pelaporan masalah publik menggunakan Next.js 14, TypeScript, Supabase, dan Tailwind CSS. Aplikasi mencakup multi-role (citizen, officer, admin), peta interaktif, dan alur kerja pelaporan end-to-end.',
+    highlights: [
+      'Membangun aplikasi Next.js 14 App Router dengan role-based access control.',
+      'Menggunakan Supabase untuk auth, database Postgres, dan storage.',
+      'Mengintegrasikan peta interaktif (Leaflet) dan chart (Recharts).',
+      'Menerapkan server actions, validasi Zod, dan Row Level Security.',
+      'Menulis unit test dengan Vitest dan React Testing Library.',
+    ],
+    sortKey: 5,
+  },
+  {
     id: 'fullstack-dashboard',
     title: 'Full-Stack Dashboard Development',
     subtitle: 'Laravel Monitoring Project',

@@ -42,7 +42,7 @@ describe('content integrity — counts', () => {
   });
 
   it('has four experience entries', () => {
-    expect(experience).toHaveLength(4);
+    expect(experience).toHaveLength(5);
   });
 
   it('has exactly 5 projects', () => {
@@ -192,8 +192,9 @@ describe('content integrity — project pinned text (Req 5.2, 5.3, 5.4)', () => 
 });
 
 describe('content integrity — experience entries (Req 6.2, 6.3)', () => {
-  it('contains exactly the four expected titles', () => {
+  it('contains exactly the five expected titles', () => {
     expect(experience.map((entry) => entry.title)).toEqual([
+      'Fullstack Web Platform Development',
       'Full-Stack Dashboard Development',
       'Web Development Project Experience',
       'Front-End & UI Implementation',
