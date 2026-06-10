@@ -187,6 +187,22 @@ export const projects: Project[] = [
     githubUrl: 'https://github.com/naemuenggar/Laravel-Monitoring',
     liveDemoUrl: null,
   },
+  {
+    title: 'CivicFlow — Public Issue Reporting',
+    description:
+      'Platform pelaporan masalah publik fullstack yang menghubungkan masyarakat, petugas, dan admin pemerintah daerah. Fitur termasuk RBAC, peta interaktif, dashboard statistik, upload foto, timeline status, dan audit log.',
+    techStack: [
+      'Next.js 14',
+      'TypeScript',
+      'Tailwind CSS',
+      'Supabase',
+      'React Leaflet',
+      'Recharts',
+    ],
+    imageUrl: '/projects/civic.png',
+    githubUrl: 'https://github.com/naemuenggar/civic-flow',
+    liveDemoUrl: null,
+  },
 ];
 
 /**

@@ -45,8 +45,8 @@ describe('content integrity — counts', () => {
     expect(experience).toHaveLength(4);
   });
 
-  it('has exactly 4 projects', () => {
-    expect(projects).toHaveLength(4);
+  it('has exactly 5 projects', () => {
+    expect(projects).toHaveLength(5);
   });
 });
 
@@ -175,6 +175,17 @@ describe('content integrity — project pinned text (Req 5.2, 5.3, 5.4)', () => 
     ]);
     expect(project.githubUrl).toBe(
       'https://github.com/naemuenggar/Laravel-Monitoring',
+    );
+    expect(project.liveDemoUrl).toBeNull();
+  });
+
+  it('pins the CivicFlow project', () => {
+    const project = projects[4];
+    expect(project.title).toBe('CivicFlow — Public Issue Reporting');
+    expect(project.techStack).toContain('Next.js 14');
+    expect(project.techStack).toContain('Supabase');
+    expect(project.githubUrl).toBe(
+      'https://github.com/naemuenggar/civic-flow',
     );
     expect(project.liveDemoUrl).toBeNull();
   });

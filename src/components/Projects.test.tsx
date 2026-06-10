@@ -59,6 +59,19 @@ const EXPECTED_PROJECTS = [
       'Chart.js',
     ],
   },
+  {
+    title: 'CivicFlow — Public Issue Reporting',
+    description:
+      'Platform pelaporan masalah publik fullstack yang menghubungkan masyarakat, petugas, dan admin pemerintah daerah. Fitur termasuk RBAC, peta interaktif, dashboard statistik, upload foto, timeline status, dan audit log.',
+    techStack: [
+      'Next.js 14',
+      'TypeScript',
+      'Tailwind CSS',
+      'Supabase',
+      'React Leaflet',
+      'Recharts',
+    ],
+  },
 ] as const;
 
 describe('Projects — pinned card content (Req 5.2, 5.3, 5.4)', () => {
@@ -84,13 +97,11 @@ describe('Projects — pinned card content (Req 5.2, 5.3, 5.4)', () => {
     }
   });
 
-  it('renders exactly four project cards', () => {
+  it('renders exactly five project cards', () => {
     render(<Projects projects={projects} />);
 
-    // Each card is identified by its title heading (level 3). Tech-stack
-    // badges are also list items, so count headings rather than list items.
     const cardTitles = screen.getAllByRole('heading', { level: 3 });
-    expect(cardTitles).toHaveLength(4);
+    expect(cardTitles).toHaveLength(5);
   });
 });
 
