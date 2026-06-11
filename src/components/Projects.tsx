@@ -158,18 +158,34 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
       style={tiltStyle}
+      // NOTE: no `overflow-hidden` here. `overflow: hidden` would create a
+      // flattening context that collapses the nested `translateZ` depth layers
+      // below, killing the 3D pop. Corners are clipped on the thumbnail wrapper
+      // (a leaf) and the card stays rounded via its border radius instead.
       className={
-        'group relative flex h-full flex-col overflow-hidden rounded-lg border border-surface ' +
-        'bg-surface transition-colors duration-200 ' +
-        'hover:border-accent hover:shadow-md ' +
+        'group relative flex h-full flex-col rounded-2xl border border-surface ' +
+        'bg-surface transition-[border-color,box-shadow] duration-300 ' +
+        'hover:border-accent hover:shadow-[0_20px_45px_-15px_rgba(99,102,241,0.45)] ' +
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ' +
         'focus-visible:ring-offset-2 focus-visible:ring-offset-base'
       }
     >
+      {/* Accent glow wash (top-right radial), echoing the reference card's
+          colored corner. Subtle while idle, brighter on hover. Decorative. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-2xl opacity-50 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background:
+            'radial-gradient(ellipse at right top, rgba(99,102,241,0.18) 0%, transparent 55%)',
+        }}
+      />
+
       {/* Thumbnail (Jitter media on hover, static poster/placeholder while idle).
           VectorMedia fails visible to `fallbackSrc` on any media error (Req 5.8,
-          10.2, 10.4). */}
-      <div className="relative">
+          10.2, 10.4). Lifts toward the viewer in 3D on hover (motion-safe only,
+          so reduced motion gets no pop — Req 7.1). */}
+      <div className="relative overflow-hidden rounded-t-2xl motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:[transform:translateZ(35px)]">
         <VectorMedia
           media={media}
           fallbackSrc={fallbackSrc}
@@ -191,24 +207,27 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
         />
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 p-6">
+      {/* Content layer. `preserve-3d` lets each child below float at its own
+          depth so the title, description, tech, and buttons "pop" forward on
+          hover like the reference (motion-safe only). */}
+      <div className="relative flex flex-1 flex-col gap-4 p-6 [transform-style:preserve-3d]">
         {/* Title + line-drawn Iconsax "view project" arrow (Req 5.1). */}
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:[transform:translateZ(55px)]">
           <h3 className="text-xl font-bold text-ink">{title}</h3>
           <Icons.arrow
             ref={arrowRef}
             aria-hidden="true"
-            className="h-5 w-5 shrink-0 text-accent"
+            className="h-5 w-5 shrink-0 text-accent transition-transform duration-300 group-hover:translate-x-1"
           />
         </div>
 
         {/* Description (Req 5.1). */}
-        <p className="text-base leading-relaxed text-ink/80 break-words">
+        <p className="text-base leading-relaxed text-ink/80 break-words motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:[transform:translateZ(35px)]">
           {description}
         </p>
 
         {/* Technology stack — every item rendered (Req 5.1). */}
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2 motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:[transform:translateZ(25px)]">
           {techStack.map((tech) => (
             <li
               key={tech}
@@ -220,8 +239,9 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
         </ul>
 
         {/* Action buttons. Configured URLs open in a new tab (Req 5.6); null
-            URLs render disabled and do not navigate (Req 5.7). */}
-        <div className="mt-auto flex gap-3 pt-2">
+            URLs render disabled and do not navigate (Req 5.7). Float highest on
+            hover so they sit closest to the viewer. */}
+        <div className="mt-auto flex gap-3 pt-2 motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:[transform:translateZ(65px)]">
           <ExternalLink
             href={liveDemoUrl}
             variant="primary"
