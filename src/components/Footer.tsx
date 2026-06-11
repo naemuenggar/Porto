@@ -1,6 +1,4 @@
-import { SiGithub } from 'react-icons/si';
-import { FaLinkedin } from 'react-icons/fa';
-
+import { Icons } from '../lib/icons';
 import { ExternalLink } from './ExternalLink';
 
 /**
@@ -46,12 +44,12 @@ export function Footer({
         {/* Exactly two distinct external links: GitHub and LinkedIn (Req 8.2). */}
         <nav aria-label="Footer social links" className="flex items-center gap-6">
           <ExternalLink href={githubUrl} aria-label="GitHub">
-            <SiGithub aria-hidden="true" className="h-5 w-5" />
+            <Icons.github aria-hidden="true" className="h-5 w-5" />
             <span>GitHub</span>
           </ExternalLink>
 
           <ExternalLink href={linkedinUrl} aria-label="LinkedIn">
-            <FaLinkedin aria-hidden="true" className="h-5 w-5" />
+            <Icons.linkedin aria-hidden="true" className="h-5 w-5" />
             <span>LinkedIn</span>
           </ExternalLink>
         </nav>

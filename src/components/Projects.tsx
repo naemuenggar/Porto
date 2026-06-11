@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { SiGithub } from 'react-icons/si';
-import { FiExternalLink } from 'react-icons/fi';
 
+import { Icons } from '../lib/icons';
 import { ExternalLink } from './ExternalLink';
+import { RevealOnScroll, StaggerGroup } from './animation/RevealOnScroll';
+import { useMicroInteraction } from './animation/animeHooks';
+import { MICRO_INTERACTION_DEFAULTS } from '../lib/animation/timelineConfig';
 import type { Project } from '../types';
 
 // Bundled placeholder image (Vite resolves this to a URL string). Shown when a
@@ -61,6 +63,19 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
   // fallback timeout so a slow-but-successful load is not wrongly replaced.
   const loadedRef = useRef(false);
 
+  // Anime.js physics "lift" micro-interaction on the focusable card (Req 5.2,
+  // 5.3). Anime owns the `translateY` transform sub-property under the DISJOINT
+  // ownership id `project-card`, so it never collides with Motion's `transform`
+  // reveal ownership on the `projects-cards` stagger container (Req 3.2, 3.4):
+  // the card is a separate DOM node nested inside Motion's stagger wrapper.
+  // Because Anime now drives the lift, the prior CSS `hover:-translate-y-1`
+  // utility is removed from the card so CSS and the engine never both write the
+  // `transform` channel; the hook leaves tabindex and the accent focus-ring
+  // classes intact, preserving focusability and the focus ring (Req 5.6).
+  const cardRef = useMicroInteraction<HTMLLIElement>(
+    MICRO_INTERACTION_DEFAULTS.hoverLift,
+  );
+
   useEffect(() => {
     // Reset state whenever the source changes (e.g. across re-renders with a
     // different project image).
@@ -82,11 +97,12 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
 
   return (
     <li
+      ref={cardRef}
       tabIndex={0}
       className={
-        'group flex flex-col overflow-hidden rounded-lg border border-surface ' +
+        'group flex h-full flex-col overflow-hidden rounded-lg border border-surface ' +
         'bg-surface transition-all duration-200 ' +
-        'hover:-translate-y-1 hover:border-accent hover:shadow-md ' +
+        'hover:border-accent hover:shadow-md ' +
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ' +
         'focus-visible:ring-offset-2 focus-visible:ring-offset-base'
       }
@@ -136,7 +152,7 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
             className={ACTION_BUTTON_CLASSES}
             aria-label={`${title} live demo`}
           >
-            <FiExternalLink aria-hidden="true" className="h-5 w-5" />
+            <Icons.externalLink aria-hidden="true" className="h-5 w-5" />
             <span>Live Demo</span>
           </ExternalLink>
 
@@ -146,7 +162,7 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
             className={ACTION_BUTTON_CLASSES}
             aria-label={`${title} GitHub repository`}
           >
-            <SiGithub aria-hidden="true" className="h-5 w-5" />
+            <Icons.github aria-hidden="true" className="h-5 w-5" />
             <span>GitHub</span>
           </ExternalLink>
         </div>
@@ -159,18 +175,26 @@ export function Projects({ projects }: ProjectsProps): JSX.Element {
   return (
     <section id="projects" className="bg-base py-16 sm:py-20">
       <div className="mx-auto max-w-5xl px-4">
-        <h2 className="mb-8 text-center text-2xl font-bold text-ink sm:text-3xl">
-          Projects
-        </h2>
+        {/* Section entrance reveal (Motion owns opacity + transform). */}
+        <RevealOnScroll as="div" className="mb-8 text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Projects</h2>
+        </RevealOnScroll>
 
-        {/* One card per project (Req 5.1). Multi-column grid: a single column
-            on mobile widening to 2–3 columns on larger/desktop viewports
-            (Req 9.2, 9.3). */}
-        <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* One card per project (Req 5.1). The StaggerGroup renders the
+            multi-column grid container — a single column on mobile widening to
+            2–3 columns on larger/desktop viewports (Req 9.2, 9.3) — and reveals
+            each card in a staggered sequence (Req 4.2). `h-full` keeps each
+            card filling its grid cell so the layout matches the pre-animation
+            grid. */}
+        <StaggerGroup
+          as="ul"
+          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+          childClassName="h-full"
+        >
           {projects.map((project) => (
             <ProjectCard key={project.title} project={project} />
           ))}
-        </ul>
+        </StaggerGroup>
       </div>
     </section>
   );

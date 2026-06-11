@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { SiGithub } from 'react-icons/si';
-import { FaLinkedin } from 'react-icons/fa';
 
+import { Icons } from '../lib/icons';
 import { ExternalLink } from './ExternalLink';
+import { StaggerGroup } from './animation/RevealOnScroll';
+import { useMicroInteraction } from './animation/animeHooks';
+import { MICRO_INTERACTION_DEFAULTS } from '../lib/animation/timelineConfig';
 import { scrollToSection } from '../lib/scroll';
 
 /**
@@ -68,6 +70,20 @@ export function Hero({
   // Inline error shown only on the CV-unavailable path (Req 2.7).
   const [cvError, setCvError] = useState<string | null>(null);
 
+  // Anime.js physics micro-interactions on the two primary action buttons
+  // (Req 5.2, 5.3). Anime owns the `scale` transform sub-property on these
+  // focusable elements via DISJOINT ownership ids (`hero-cta-primary` /
+  // `hero-cta-secondary`), so it never collides with Motion's reveal ownership
+  // of `transform` on the Hero stagger elements (Req 3.2, 3.4). The hooks add
+  // only listeners; they never touch tabindex or the focus-ring classes, so
+  // keyboard focusability and the accent focus ring are preserved (Req 5.6).
+  const primaryActionRef = useMicroInteraction<HTMLButtonElement>(
+    MICRO_INTERACTION_DEFAULTS.buttonPress,
+  );
+  const secondaryActionRef = useMicroInteraction<HTMLButtonElement>(
+    MICRO_INTERACTION_DEFAULTS.buttonPress,
+  );
+
   const handleViewProjects = (): void => {
     // Scroll the Projects section into view (Req 2.4, 2.5).
     scrollToSection('projects');
@@ -98,45 +114,64 @@ export function Hero({
       id="home"
       className="flex min-h-screen flex-col items-center justify-center gap-5 bg-base px-6 py-24 text-center text-ink sm:px-10 lg:px-20"
     >
-      <h1 className="max-w-4xl text-4xl font-extrabold tracking-tight text-ink break-words sm:text-5xl lg:text-6xl">
-        {name}
-      </h1>
+      {/*
+        Staggered section entrance. The StaggerGroup container uses
+        `display: contents` so it adds no box of its own — its child wrappers
+        participate directly in the section's centered flex layout, preserving
+        the existing spacing and alignment while each block reveals in sequence
+        (Req 4.1, 4.2). Motion owns opacity + transform on these elements.
+      */}
+      <StaggerGroup as="div" className="contents">
+        <h1 className="max-w-4xl text-4xl font-extrabold tracking-tight text-ink break-words sm:text-5xl lg:text-6xl">
+          {name}
+        </h1>
 
-      <p className="text-2xl font-semibold tracking-wide text-accent sm:text-3xl">
-        {role}
-      </p>
-
-      <p className="max-w-2xl text-base leading-relaxed text-ink/70 break-words sm:text-lg">
-        {summary}
-      </p>
-
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
-        <button type="button" onClick={handleViewProjects} className={BUTTON_PRIMARY}>
-          View Projects
-        </button>
-
-        <button type="button" onClick={handleDownloadCv} className={BUTTON_SECONDARY}>
-          Download CV
-        </button>
-      </div>
-
-      {cvError !== null && (
-        <p role="alert" className="text-base font-medium text-accent">
-          {cvError}
+        <p className="text-2xl font-semibold tracking-wide text-accent sm:text-3xl">
+          {role}
         </p>
-      )}
 
-      <div className="mt-2 flex items-center justify-center gap-6">
-        <ExternalLink href={githubUrl} aria-label="GitHub profile">
-          <SiGithub aria-hidden="true" className="h-5 w-5" />
-          <span>GitHub</span>
-        </ExternalLink>
+        <p className="max-w-2xl text-base leading-relaxed text-ink/70 break-words sm:text-lg">
+          {summary}
+        </p>
 
-        <ExternalLink href={linkedinUrl} aria-label="LinkedIn profile">
-          <FaLinkedin aria-hidden="true" className="h-5 w-5" />
-          <span>LinkedIn</span>
-        </ExternalLink>
-      </div>
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
+          <button
+            ref={primaryActionRef}
+            type="button"
+            onClick={handleViewProjects}
+            className={BUTTON_PRIMARY}
+          >
+            View Projects
+          </button>
+
+          <button
+            ref={secondaryActionRef}
+            type="button"
+            onClick={handleDownloadCv}
+            className={BUTTON_SECONDARY}
+          >
+            Download CV
+          </button>
+        </div>
+
+        {cvError !== null && (
+          <p role="alert" className="text-base font-medium text-accent">
+            {cvError}
+          </p>
+        )}
+
+        <div className="mt-2 flex items-center justify-center gap-6">
+          <ExternalLink href={githubUrl} aria-label="GitHub profile">
+            <Icons.github aria-hidden="true" className="h-5 w-5" />
+            <span>GitHub</span>
+          </ExternalLink>
+
+          <ExternalLink href={linkedinUrl} aria-label="LinkedIn profile">
+            <Icons.linkedin aria-hidden="true" className="h-5 w-5" />
+            <span>LinkedIn</span>
+          </ExternalLink>
+        </div>
+      </StaggerGroup>
     </section>
   );
 }

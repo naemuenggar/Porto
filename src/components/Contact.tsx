@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { SiGithub } from 'react-icons/si';
-import { FaEnvelope, FaMapMarkerAlt, FaLinkedin } from 'react-icons/fa';
 
+import { Icons } from '../lib/icons';
 import { ExternalLink } from './ExternalLink';
+import { RevealOnScroll, StaggerGroup } from './animation/RevealOnScroll';
+import { useMicroInteraction } from './animation/animeHooks';
+import { MICRO_INTERACTION_DEFAULTS } from '../lib/animation/timelineConfig';
 import { LIMITS, isValidEmail, validateContactForm } from '../lib/validation';
 import type {
   ContactDetails,
@@ -77,6 +79,16 @@ export function ContactForm({
   // Submission-outcome banner: success confirmation or failure error (Req 7.11, 7.12).
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Anime.js physics micro-interaction on the submit control (Req 5.2, 5.3).
+  // Anime owns the `scale` transform sub-property under the DISJOINT ownership
+  // id `contact-submit`, so it never collides with Motion's `transform` reveal
+  // ownership on the contact stagger/form elements (Req 3.2, 3.4). The hook only
+  // adds listeners; it leaves tabindex and the accent focus-ring classes intact,
+  // preserving keyboard focusability and the focus ring (Req 5.6).
+  const submitRef = useMicroInteraction<HTMLButtonElement>(
+    MICRO_INTERACTION_DEFAULTS.buttonPress,
+  );
 
   const handleChange = (
     field: keyof ContactFormState,
@@ -207,7 +219,7 @@ export function ContactForm({
 
       {/* Submit control (Req 7.7). */}
       <div className="flex flex-col gap-3">
-        <button type="submit" disabled={status === 'submitting'} className={SUBMIT_BUTTON}>
+        <button type="submit" ref={submitRef} disabled={status === 'submitting'} className={SUBMIT_BUTTON}>
           {status === 'submitting' ? 'Sending…' : 'Send Message'}
         </button>
 
@@ -245,15 +257,20 @@ export function Contact({ details, onSubmit }: ContactProps): JSX.Element {
   return (
     <section id="contact" className="bg-surface py-16 sm:py-20">
       <div className="mx-auto max-w-5xl px-4">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">Contact</h2>
+        {/* Section entrance reveal (Motion owns opacity + transform). */}
+        <RevealOnScroll as="div">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Contact</h2>
+        </RevealOnScroll>
 
         {/* Single-column on mobile; two columns from md up (Req 9.1). */}
         <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2">
-          {/* Contact details, each with an adjacent icon (Req 7.1, 7.4). */}
-          <ul className="flex flex-col gap-4">
+          {/* Contact details, each with an adjacent icon (Req 7.1, 7.4). The
+              StaggerGroup renders the same `flex flex-col gap-4` list and
+              reveals each detail row in a staggered sequence (Req 4.2). */}
+          <StaggerGroup as="ul" className="flex flex-col gap-4">
             {/* Email via mailto: link (Req 7.3). */}
             <li className="flex items-center gap-3 text-base text-ink">
-              <FaEnvelope aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
+              <Icons.email aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
               <a
                 href={`mailto:${email}`}
                 className="min-w-0 break-all rounded text-accent transition-colors duration-200 hover:text-ink hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
@@ -264,7 +281,7 @@ export function Contact({ details, onSubmit }: ContactProps): JSX.Element {
 
             {/* GitHub — opens in a new tab (Req 7.2). */}
             <li className="flex items-center gap-3 text-base text-ink">
-              <SiGithub aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
+              <Icons.github aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
               <ExternalLink href={githubUrl} aria-label="GitHub profile">
                 <span>GitHub</span>
               </ExternalLink>
@@ -272,7 +289,7 @@ export function Contact({ details, onSubmit }: ContactProps): JSX.Element {
 
             {/* LinkedIn — opens in a new tab (Req 7.2). */}
             <li className="flex items-center gap-3 text-base text-ink">
-              <FaLinkedin aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
+              <Icons.linkedin aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
               <ExternalLink href={linkedinUrl} aria-label="LinkedIn profile">
                 <span>LinkedIn</span>
               </ExternalLink>
@@ -280,13 +297,15 @@ export function Contact({ details, onSubmit }: ContactProps): JSX.Element {
 
             {/* Location text (Req 7.1). */}
             <li className="flex items-center gap-3 text-base text-ink">
-              <FaMapMarkerAlt aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
+              <Icons.location aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-accent" />
               <span>{location}</span>
             </li>
-          </ul>
+          </StaggerGroup>
 
-          {/* Contact form (Req 7.5–7.12). */}
-          <ContactForm onSubmit={onSubmit} />
+          {/* Contact form (Req 7.5–7.12), revealed on entrance. */}
+          <RevealOnScroll as="div">
+            <ContactForm onSubmit={onSubmit} />
+          </RevealOnScroll>
         </div>
       </div>
     </section>

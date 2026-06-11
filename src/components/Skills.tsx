@@ -1,4 +1,5 @@
 import type { Skill, SkillCategory } from '../types';
+import { RevealOnScroll, StaggerGroup } from './animation/RevealOnScroll';
 
 /**
  * Skills section (Req 4).
@@ -40,7 +41,7 @@ export function SkillCard({ skill }: SkillCardProps): JSX.Element {
     <li
       tabIndex={0}
       className={
-        'group flex flex-col items-center justify-center gap-3 rounded-lg ' +
+        'group flex h-full flex-col items-center justify-center gap-3 rounded-lg ' +
         'border border-surface bg-surface px-4 py-6 text-center ' +
         'transition-all duration-200 ' +
         'hover:-translate-y-1 hover:border-accent hover:shadow-md ' +
@@ -68,7 +69,10 @@ export function Skills({ categories }: SkillsProps): JSX.Element {
   return (
     <section id="skills" className="bg-base py-16">
       <div className="mx-auto max-w-5xl px-4">
-        <h2 className="mb-8 text-center text-3xl font-bold text-ink">Skills</h2>
+        {/* Section entrance reveal (Motion owns opacity + transform). */}
+        <RevealOnScroll as="div" className="mb-8 text-center">
+          <h2 className="text-3xl font-bold text-ink">Skills</h2>
+        </RevealOnScroll>
 
         <div className="flex flex-col gap-10">
           {categories.map((category) => (
@@ -77,12 +81,21 @@ export function Skills({ categories }: SkillsProps): JSX.Element {
                 {category.title}
               </h3>
 
-              {/* One element per skill (Req 4.1). Multi-column grid. */}
-              <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {/*
+                One element per skill (Req 4.1). The StaggerGroup renders the
+                multi-column grid container and reveals each skill card in a
+                staggered sequence (Req 4.2). `h-full` keeps each card filling
+                its grid cell so the layout matches the pre-animation grid.
+              */}
+              <StaggerGroup
+                as="ul"
+                className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
+                childClassName="h-full"
+              >
                 {category.skills.map((skill) => (
                   <SkillCard key={skill.name} skill={skill} />
                 ))}
-              </ul>
+              </StaggerGroup>
             </div>
           ))}
         </div>

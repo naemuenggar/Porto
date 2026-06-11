@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
-import { FiMenu, FiX } from 'react-icons/fi';
 
+import { Icons } from '../lib/icons';
 import { menuReducer, MENU_INITIAL_STATE } from '../lib/menu';
 import { scrollToSection } from '../lib/scroll';
 import type { NavLink } from '../types';
@@ -89,9 +89,9 @@ export function Navbar({ links }: NavbarProps): JSX.Element {
           className={`flex-shrink-0 p-2 text-ink md:hidden ${INTERACTIVE_CLASSES}`}
         >
           {isOpen ? (
-            <FiX className="h-6 w-6" aria-hidden="true" />
+            <Icons.close className="h-6 w-6" aria-hidden="true" />
           ) : (
-            <FiMenu className="h-6 w-6" aria-hidden="true" />
+            <Icons.menu className="h-6 w-6" aria-hidden="true" />
           )}
         </button>
       </div>
