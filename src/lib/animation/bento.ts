@@ -16,18 +16,27 @@ export type ProjectCardVariant = 'featured' | 'wide' | 'tall' | 'standard';
 /**
  * Container classes for the bento grid.
  *
- * Single column on mobile, two columns from `md`, four columns from `lg`, with
- * auto rows sized to a minimum track height so tall/featured cards can span
- * multiple rows.
+ * Single column on mobile, two columns from `md`, three columns from `lg`.
+ * `grid-flow-row-dense` lets smaller 1×1 cards backfill the cell left beside a
+ * wider `featured`/`wide` card, so the grid tiles without holes. Rows size to
+ * their content and grid `align-items: stretch` (the default) makes every card
+ * in a row share the tallest card's height — no empty vertical gaps.
  */
 export const BENTO_GRID_CLASSES =
-  'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-[minmax(14rem,auto)] gap-6';
+  'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-flow-row-dense gap-6';
 
-/** Span classes applied to a card wrapper for each known variant. */
+/**
+ * Span classes applied to a card wrapper for each known variant.
+ *
+ * Variants only widen a card (`col-span`); they never force extra rows, because
+ * a row span taller than the card's content leaves an ugly empty area (the card
+ * content does not grow to fill 2 rows). A `featured`/`wide` card therefore
+ * spans two columns at its natural height, sitting flush with its row.
+ */
 export const VARIANT_SPAN_CLASSES: Record<ProjectCardVariant, string> = {
-  featured: 'md:col-span-2 lg:col-span-2 lg:row-span-2',
-  wide: 'md:col-span-2 lg:col-span-2',
-  tall: 'lg:row-span-2',
+  featured: 'md:col-span-2',
+  wide: 'md:col-span-2',
+  tall: 'md:col-span-2',
   standard: '',
 };
 

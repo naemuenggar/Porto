@@ -103,10 +103,10 @@ describe('Projects — bento grid container (Req 9.3, 9.4)', () => {
     expect(grid).toHaveClass(...BENTO_GRID_CLASSES.split(/\s+/));
 
     // Spot-check the responsive columns: single column on mobile, widening to
-    // two then four columns.
+    // two then three columns.
     expect(grid).toHaveClass('grid-cols-1');
     expect(grid).toHaveClass('md:grid-cols-2');
-    expect(grid).toHaveClass('lg:grid-cols-4');
+    expect(grid).toHaveClass('lg:grid-cols-3');
   });
 
   it('renders one card wrapper <li> per project, in document order', () => {

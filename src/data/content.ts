@@ -162,8 +162,6 @@ export const projects: Project[] = [
     imageUrl: '/projects/splitbill.png',
     githubUrl: 'https://github.com/naemuenggar/SplitBillin',
     liveDemoUrl: 'https://splitbillin.vercel.app/',
-    // Wide cell spanning two columns on larger viewports.
-    variant: 'wide',
   },
   {
     title: 'Mobile / Flutter App',

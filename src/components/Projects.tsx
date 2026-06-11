@@ -273,7 +273,7 @@ export function Projects({ projects }: ProjectsProps): JSX.Element {
             <RevealOnScroll
               key={project.title}
               as="li"
-              className={`${mapVariantToSpanClasses(project.variant)} [perspective:1000px]`}
+              className={`h-full ${mapVariantToSpanClasses(project.variant)} [perspective:1000px]`}
               delayMs={index * CARD_STAGGER_MS}
             >
               <ProjectCard project={project} />
