@@ -151,8 +151,6 @@ export const projects: Project[] = [
     imageUrl: '/projects/ecommerce.png',
     githubUrl: 'https://github.com/naemuenggar/e-commerce',
     liveDemoUrl: null,
-    // Featured hero cell to showcase the bento layout (Req 9.3, 9.4).
-    variant: 'featured',
   },
   {
     title: 'SplitBillin – Split Bill App',
