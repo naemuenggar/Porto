@@ -11,7 +11,7 @@ import { dirname, resolve } from 'node:path';
  * deferred runtime dependency (Jitter/Vector renderer, or a Barba transition
  * runtime) has been introduced ahead of the open questions (OQ-1/OQ-2/OQ-3).
  *
- * Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.6
+ * Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.6, 10.5
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -70,9 +70,20 @@ describe('dependency smoke test — deferred runtimes are absent', () => {
     expect(jitterLike).toEqual([]);
   });
 
-  it('does not declare a Lottie/Vector player runtime yet (OQ-3)', () => {
-    const vectorLike = allNames.filter((name) => /lottie/i.test(name));
-    expect(vectorLike).toEqual([]);
+  it('declares the Lottie player runtime pinned to an exact version (OQ-3 confirmed)', () => {
+    // OQ-3 confirmed: the Jitter/Vector renderer is in scope and uses the
+    // lazy-loaded Lottie player (@lottiefiles/dotlottie-react). The dependency
+    // MUST be pinned to an explicit, React-18-compatible version (Req 1.2/1.3).
+    expect(deps).toHaveProperty('@lottiefiles/dotlottie-react');
+    expect(isPinnedExact(deps['@lottiefiles/dotlottie-react'])).toBe(true);
+  });
+
+  it('does not add an MP4 runtime player dependency (native <video> is used)', () => {
+    // OQ-3 resolved to Lottie JSON via @lottiefiles/dotlottie-react; MP4 assets,
+    // if any, are played with the native <video> element. No dedicated MP4/video
+    // player runtime (video.js, hls.js, dash.js, etc.) should be declared (Req 1.4/10.5).
+    const mp4PlayerLike = allNames.filter((name) => /video\.?js|hls|dash|mp4/i.test(name));
+    expect(mp4PlayerLike).toEqual([]);
   });
 
   it('does not declare a Barba transition runtime yet (OQ-1/OQ-2)', () => {

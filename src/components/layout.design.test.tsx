@@ -135,7 +135,10 @@ describe('Hover affordances (Req 10.2)', () => {
   // Req 10.2: project cards carry a hover: class for an observable change.
   it('renders project cards with hover: classes', () => {
     const { container } = render(<Projects projects={projects} />);
-    const cards = container.querySelectorAll('li[tabindex="0"]');
+    // The focusable card is the 3D-tilt <article> (the bento grid item is its
+    // <li> reveal wrapper). Behavior preserved: each card is focusable and
+    // carries a hover affordance.
+    const cards = container.querySelectorAll('article[tabindex="0"]');
     expect(cards.length).toBe(projects.length);
     cards.forEach((card) => {
       expect(card.className).toMatch(/hover:/);
@@ -202,7 +205,8 @@ describe('Focus indicators (Req 10.5)', () => {
   // Req 10.5: project cards display an accent focus ring.
   it('renders project cards with focus-visible:ring-accent', () => {
     const { container } = render(<Projects projects={projects} />);
-    const cards = container.querySelectorAll('li[tabindex="0"]');
+    // The focusable card is the 3D-tilt <article> nested in its <li> wrapper.
+    const cards = container.querySelectorAll('article[tabindex="0"]');
     expect(cards.length).toBe(projects.length);
     cards.forEach((card) => {
       expect(card.className).toMatch(/focus-visible:ring-accent/);

@@ -1,11 +1,16 @@
-import { createElement } from 'react';
-import type { ComponentType } from 'react';
+import { createElement, forwardRef } from 'react';
+import type {
+  ComponentType,
+  ForwardRefExoticComponent,
+  RefAttributes,
+} from 'react';
 import {
   HambergerMenu,
   CloseSquare,
   ExportSquare,
   Sms,
   Location,
+  ArrowRight,
 } from 'iconsax-react';
 import type { Icon as IconsaxIcon } from 'iconsax-react';
 import { SiGithub } from 'react-icons/si';
@@ -45,11 +50,26 @@ export interface IconProps {
 }
 
 /**
+ * A concept icon component that renders an `<svg>` and forwards a ref to it.
+ *
+ * Ref forwarding lets the Anime.js `useSvgDraw` hook attach to the underlying
+ * `<svg>` (e.g. the Premium Project Card "view project" arrow) so its stroke can
+ * be line-drawn (Req 5.1). Existing call sites never pass a ref, so the ref is
+ * optional and the migration is backward compatible.
+ */
+export type IconComponent = ForwardRefExoticComponent<
+  IconProps & RefAttributes<SVGSVGElement>
+>;
+
+/**
  * Wrap an Iconsax component so it inherits its color from the surrounding
  * Tailwind text color (`currentColor`) instead of Iconsax's hard-coded default
  * hex. This preserves the existing Theme_Tokens (`base`, `surface`, `ink`,
  * `accent`) styling that the components already apply via `text-*` classes
  * (Req 9.2), matching how `react-icons` glyphs behaved before the migration.
+ *
+ * The wrapper forwards its ref to the Iconsax `<svg>` (Iconsax components are
+ * built with `forwardRef`), so `useSvgDraw` can target the rendered stroke.
  *
  * Implemented with `createElement` (no JSX) so this file can keep the `.ts`
  * extension specified by the design.
@@ -57,10 +77,12 @@ export interface IconProps {
 function withCurrentColor(
   IconComponent: IconsaxIcon,
   displayName: string,
-): ComponentType<IconProps> {
-  function IconsaxConceptIcon(props: IconProps): ReturnType<IconsaxIcon> {
-    return createElement(IconComponent, { color: 'currentColor', ...props });
-  }
+): IconComponent {
+  const IconsaxConceptIcon = forwardRef<SVGSVGElement, IconProps>(
+    function IconsaxConceptIcon(props, ref) {
+      return createElement(IconComponent, { color: 'currentColor', ref, ...props });
+    },
+  );
   IconsaxConceptIcon.displayName = displayName;
   return IconsaxConceptIcon;
 }
@@ -77,15 +99,17 @@ function withCurrentColor(
  * | `externalLink` | `ExportSquare`               | iconsax-react| `FiExternalLink` (Projects) |
  * | `email`        | `Sms`                        | iconsax-react| `FaEnvelope` (Contact)   |
  * | `location`     | `Location`                   | iconsax-react| `FaMapMarkerAlt` (Contact) |
+ * | `arrow`        | `ArrowRight`                 | iconsax-react| new "view project" arrow (Projects, line-drawn) |
  * | `github`       | `SiGithub`  (RETAINED)       | react-icons  | brand glyph — no Iconsax equivalent |
  * | `linkedin`     | `FaLinkedin` (RETAINED)      | react-icons  | brand glyph — no Iconsax equivalent |
  */
 export const Icons: {
-  menu: ComponentType<IconProps>;
-  close: ComponentType<IconProps>;
-  externalLink: ComponentType<IconProps>;
-  email: ComponentType<IconProps>;
-  location: ComponentType<IconProps>;
+  menu: IconComponent;
+  close: IconComponent;
+  externalLink: IconComponent;
+  email: IconComponent;
+  location: IconComponent;
+  arrow: IconComponent;
   github: ComponentType<IconProps>;
   linkedin: ComponentType<IconProps>;
 } = {
@@ -95,6 +119,10 @@ export const Icons: {
   externalLink: withCurrentColor(ExportSquare, 'ExternalLinkIcon'),
   email: withCurrentColor(Sms, 'EmailIcon'),
   location: withCurrentColor(Location, 'LocationIcon'),
+  // Iconsax "view project" arrow — line-drawn by `useSvgDraw` on the Premium
+  // Project Card. Its `Linear` variant renders a stroked path ideal for the
+  // SVG draw effect (Req 5.1).
+  arrow: withCurrentColor(ArrowRight, 'ArrowIcon'),
 
   // Retained Legacy_Icon_Library brand glyphs (Req 2.3). See
   // RETAINED_LEGACY_ICONS below for the rationale.

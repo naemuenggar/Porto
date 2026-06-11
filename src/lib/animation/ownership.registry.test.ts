@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   PROJECT_OWNERSHIP_REGISTRY,
   findOwnershipConflicts,
+  isOwnershipValid,
 } from './ownership';
 
 /**
@@ -21,8 +22,20 @@ import {
  *   free of cross-engine property conflicts.
  */
 
-/** Properties Motion is allowed to own (Req 3.1, 10.1). */
-const MOTION_ALLOWED_PROPERTIES = new Set(['opacity', 'transform']);
+/**
+ * Properties Motion is allowed to own (Req 3.1, 10.1).
+ *
+ * In addition to the compositor entrance channels (`opacity`, `transform`),
+ * Motion owns the Premium Project Card glare overlay, which is driven via
+ * dedicated CSS custom properties on a distinct overlay node (Req 3.1, 3.5).
+ */
+const MOTION_ALLOWED_PROPERTIES = new Set([
+  'opacity',
+  'transform',
+  '--glare-x',
+  '--glare-y',
+  '--glare-opacity',
+]);
 
 /** Properties Anime.js is allowed to own (Req 3.2). */
 const ANIME_ALLOWED_PROPERTIES = new Set([
@@ -50,7 +63,13 @@ const EXPECTED_ELEMENT_IDS = [
   // Anime.js micro-interaction entries.
   'hero-cta-primary',
   'hero-cta-secondary',
-  'project-card',
+  // Premium Project Card layers (task 12): the old single `project-card`
+  // entry is replaced by distinct nested nodes — Motion owns the reveal,
+  // tilt, and glare overlay; Anime.js owns the icon SVG line draw.
+  'project-card-reveal',
+  'project-card-tilt',
+  'project-card-glare',
+  'project-card-icon',
   'contact-submit',
 ];
 
@@ -106,5 +125,54 @@ describe('PROJECT_OWNERSHIP_REGISTRY scoping', () => {
 
   it('has no cross-engine ownership conflicts (Req 3.3, 3.4, 3.5)', () => {
     expect(findOwnershipConflicts(PROJECT_OWNERSHIP_REGISTRY)).toEqual([]);
+  });
+
+  it('reports the registry as valid (Req 3.3, 3.4, 3.5)', () => {
+    expect(isOwnershipValid(PROJECT_OWNERSHIP_REGISTRY)).toBe(true);
+  });
+
+  it('Premium Project Card tilt/glare property sets are disjoint from the reveal entry (Req 3.1, 3.3, 3.4)', () => {
+    const findEntry = (elementId: string) => {
+      const entry = PROJECT_OWNERSHIP_REGISTRY.find(
+        (candidate) => candidate.elementId === elementId,
+      );
+      expect(entry, `missing registry entry "${elementId}"`).toBeDefined();
+      return entry!;
+    };
+
+    const reveal = findEntry('project-card-reveal');
+    const tilt = findEntry('project-card-tilt');
+    const glare = findEntry('project-card-glare');
+
+    const revealProps = new Set(reveal.properties);
+
+    // The tilt overlay drives only `transform`; the reveal entry also lists
+    // `transform`, but they live on DISTINCT logical nodes (distinct element
+    // ids) so no single node is double-owned. Here we assert the documented
+    // separation: tilt/glare are registered under their own ids, and the glare
+    // channels never leak into the reveal entry.
+    expect(reveal.elementId).not.toBe(tilt.elementId);
+    expect(reveal.elementId).not.toBe(glare.elementId);
+    expect(tilt.elementId).not.toBe(glare.elementId);
+
+    // The glare custom properties must NOT appear on the reveal entry.
+    for (const property of ['--glare-x', '--glare-y', '--glare-opacity']) {
+      expect(
+        revealProps.has(property),
+        `reveal entry must not own glare property "${property}"`,
+      ).toBe(false);
+      expect(glare.properties).toContain(property);
+    }
+
+    // Tilt owns transform; the glare entry owns opacity + glare channels, and
+    // the two interaction layers share no property string.
+    expect(tilt.properties).toContain('transform');
+    const tiltProps = new Set(tilt.properties);
+    for (const property of glare.properties) {
+      expect(
+        tiltProps.has(property),
+        `tilt and glare must not share property "${property}"`,
+      ).toBe(false);
+    }
   });
 });

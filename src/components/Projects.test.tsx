@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { render, cleanup, screen, within, fireEvent } from '@testing-library/react';
+import { render, cleanup, screen, within } from '@testing-library/react';
 
 import { Projects, ProjectCard } from './Projects';
 import { projects } from '../data/content';
@@ -129,10 +129,12 @@ describe('Projects — action buttons (Req 5.5)', () => {
   });
 });
 
-describe('Projects — image-error placeholder fallback (Req 5.8)', () => {
-  it('falls back to the placeholder on image error while retaining title, description, and links', () => {
-    // Use a project with a distinct (non-placeholder) image so the fallback is
-    // observable, and configured links so we can confirm they survive.
+describe('Projects — thumbnail rendering and content preservation (Req 5.8, 9.1)', () => {
+  it('renders the project thumbnail via VectorMedia while retaining title, description, tech, and links', () => {
+    // A project with a distinct (non-placeholder) image and configured links.
+    // With no animated `media`, VectorMedia fails visible to the static
+    // thumbnail (`fallbackSrc`, the project image), preserving the existing
+    // static-image behavior (Req 5.8).
     const project: Project = {
       title: 'e-Commerce Website',
       description:
@@ -149,15 +151,10 @@ describe('Projects — image-error placeholder fallback (Req 5.8)', () => {
       </ul>,
     );
 
+    // The thumbnail renders the project's static image (VectorMedia's
+    // fail-visible static source) with the project preview alt text.
     const image = screen.getByRole('img', { name: 'e-Commerce Website preview' });
-    // Initially the real image source is used.
     expect(image).toHaveAttribute('src', project.imageUrl);
-
-    // Simulate the image failing to load.
-    fireEvent.error(image);
-
-    // The src now points at the bundled placeholder (Req 5.8).
-    expect(image).toHaveAttribute('src', placeholderImage);
 
     // Title, description, and tech stack remain intact.
     expect(
@@ -177,5 +174,27 @@ describe('Projects — image-error placeholder fallback (Req 5.8)', () => {
     });
     expect(github).toHaveAttribute('href', project.githubUrl);
     expect(liveDemo).toHaveAttribute('href', project.liveDemoUrl);
+  });
+
+  it('falls back to the bundled placeholder when a project has no image URL', () => {
+    // An empty image URL has no static source, so the card uses the bundled
+    // placeholder as the ultimate fallback (Req 5.8).
+    const project: Project = {
+      title: 'No Image Project',
+      description: 'A project without a configured thumbnail image.',
+      techStack: ['React'],
+      imageUrl: '',
+      githubUrl: null,
+      liveDemoUrl: null,
+    };
+
+    render(
+      <ul>
+        <ProjectCard project={project} />
+      </ul>,
+    );
+
+    const image = screen.getByRole('img', { name: 'No Image Project preview' });
+    expect(image).toHaveAttribute('src', placeholderImage);
   });
 });

@@ -1,10 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  type MotionStyle,
+} from 'motion/react';
 
 import { Icons } from '../lib/icons';
 import { ExternalLink } from './ExternalLink';
-import { RevealOnScroll, StaggerGroup } from './animation/RevealOnScroll';
-import { useMicroInteraction } from './animation/animeHooks';
-import { MICRO_INTERACTION_DEFAULTS } from '../lib/animation/timelineConfig';
+import { RevealOnScroll } from './animation/RevealOnScroll';
+import { useSvgDraw } from './animation/animeHooks';
+import { VectorMedia } from './animation/VectorMedia';
+import { useReducedMotion } from '../lib/animation/reducedMotion';
+import { BENTO_GRID_CLASSES, mapVariantToSpanClasses } from '../lib/animation/bento';
+import { DEFAULT_REVEAL_CONFIG } from '../lib/animation/motionConfig';
+import { computeTilt, NEUTRAL_TILT } from '../lib/animation/tilt';
 import type { Project } from '../types';
 
 // Bundled placeholder image (Vite resolves this to a URL string). Shown when a
@@ -12,31 +23,39 @@ import type { Project } from '../types';
 import placeholderImage from '../assets/placeholder.svg';
 
 /**
- * Projects section (Req 5).
+ * Projects section — the Premium Project Card (Req 5, 9, 10; OQ-3 confirmed).
  *
- * Renders the portfolio projects as a responsive grid of cards — one
- * {@link ProjectCard} per project. The section is wrapped in
- * `<section id="projects">` so the Navbar and the Hero "View Projects" button
- * can scroll to it (Req 1.2, 2.5).
+ * The section is *adapted, not rebuilt*: it keeps the `#projects` anchor, the
+ * `content.ts` data source, the {@link ExternalLink} action buttons, the image
+ * fallback, the theme tokens, and card focusability — and layers the premium
+ * card capabilities on top, each REUSING an existing layer:
  *
- * Each card shows the project image, title, description, every technology-stack
- * item, and both a GitHub and a Live Demo action button (Req 5.1). The action
- * buttons reuse the shared {@link ExternalLink} helper so a configured URL
- * opens in a new tab (Req 5.6) and a `null` URL renders disabled and never
- * navigates (Req 5.7).
+ *  - **Bento grid** (`bento.ts`): each card wrapper is a grid item carrying its
+ *    `mapVariantToSpanClasses(variant)` span on the `BENTO_GRID_CLASSES`
+ *    container — single column on mobile, widening to 2 then 4 columns
+ *    (Req 9.3, 9.4).
+ *  - **Entrance stagger** (`RevealOnScroll`): each card wrapper reveals once with
+ *    an incremental `index * staggerMs` delay (Req 4.2). Motion owns the
+ *    entrance `opacity`/`transform` on the wrapper (`project-card-reveal`).
+ *  - **3D tilt + glare** (`tilt.ts` + Motion): a nested `motion.article` tilts
+ *    toward the cursor (`project-card-tilt`, Motion `transform`) with a glare
+ *    overlay (`project-card-glare`, Motion `opacity` + glare custom props). All
+ *    math is pure (`computeTilt`); reduced motion returns `NEUTRAL_TILT`
+ *    (Req 7.1, 10.1).
+ *  - **Iconsax SVG line-draw** (`useSvgDraw`): the "view project" arrow is drawn
+ *    on hover/in-view (`project-card-icon`, Anime `strokeDashoffset`, Req 5.1).
+ *  - **Jitter media thumbnail** (`VectorMedia`): the thumbnail plays on hover and
+ *    is otherwise paused at its poster, falling back to the static placeholder
+ *    (Req 1.2, 10.2, 10.4).
  *
- * The image uses an `onError` handler plus a load timeout to swap in the
- * bundled placeholder while retaining the title, description, tech stack, and
- * links (Req 5.8).
- *
- * Layout grows from a single column on mobile to two or more columns on
- * larger/desktop viewports (Req 9.2, 9.3). Styling uses only palette tokens
- * (`base`/`surface`/`ink`/`accent`) with a hover change on the card, an accent
- * focus ring, and transitions bounded within 100–500ms (Req 10.1, 10.2, 10.3,
- * 10.5).
+ * The previous Anime.js `hoverLift` translateY micro-interaction on the card is
+ * removed: the 3D tilt supersedes it, and the ownership registry now records
+ * `project-card-tilt`/`project-card-icon` in its place so no node has two
+ * transform writers (Req 3.3, 3.4). The Hero/Contact micro-interactions are
+ * untouched.
  */
 export interface ProjectsProps {
-  /** The projects to display (3 per the content module, Req 5.2–5.4). */
+  /** The projects to display. */
   projects: Project[];
 }
 
@@ -45,90 +64,148 @@ export interface ProjectCardProps {
   project: Project;
 }
 
-/** Maximum time (ms) to wait for the project image before falling back. */
-const IMAGE_LOAD_TIMEOUT_MS = 5000;
-
 /** Layout classes shared by both card action buttons (variant adds the rest). */
 const ACTION_BUTTON_CLASSES = 'flex-1 justify-center text-base';
 
+/** Spring config smoothing the 3D tilt rotation toward the cursor. */
+const TILT_SPRING = { stiffness: 220, damping: 18, mass: 0.4 } as const;
+
 export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
-  const { title, description, techStack, imageUrl, githubUrl, liveDemoUrl } =
+  const { title, description, techStack, imageUrl, githubUrl, liveDemoUrl, media } =
     project;
 
-  // Track whether the image failed (via onError or timeout). Once failed we
-  // render the bundled placeholder instead, keeping all other content intact
-  // (Req 5.8).
-  const [imageFailed, setImageFailed] = useState(false);
-  // Whether the image has finished loading successfully — used to cancel the
-  // fallback timeout so a slow-but-successful load is not wrongly replaced.
-  const loadedRef = useRef(false);
+  const reducedMotion = useReducedMotion();
 
-  // Anime.js physics "lift" micro-interaction on the focusable card (Req 5.2,
-  // 5.3). Anime owns the `translateY` transform sub-property under the DISJOINT
-  // ownership id `project-card`, so it never collides with Motion's `transform`
-  // reveal ownership on the `projects-cards` stagger container (Req 3.2, 3.4):
-  // the card is a separate DOM node nested inside Motion's stagger wrapper.
-  // Because Anime now drives the lift, the prior CSS `hover:-translate-y-1`
-  // utility is removed from the card so CSS and the engine never both write the
-  // `transform` channel; the hook leaves tabindex and the accent focus-ring
-  // classes intact, preserving focusability and the focus ring (Req 5.6).
-  const cardRef = useMicroInteraction<HTMLLIElement>(
-    MICRO_INTERACTION_DEFAULTS.hoverLift,
-  );
+  // Whether the card is currently hovered — drives the VectorMedia thumbnail
+  // playback (play on hover, paused poster while idle — Req 10.2).
+  const [hovered, setHovered] = useState(false);
 
-  useEffect(() => {
-    // Reset state whenever the source changes (e.g. across re-renders with a
-    // different project image).
-    loadedRef.current = false;
-    setImageFailed(false);
+  // --- Anime.js SVG line-draw on the Iconsax "view project" arrow (Req 5.1).
+  // `useSvgDraw` owns ONLY `strokeDashoffset` on this distinct icon node
+  // (`project-card-icon`), disjoint from every Motion entry (Req 3.2, 3.4). It
+  // short-circuits to the fully-drawn stroke under reduced motion (Req 7.2).
+  const arrowRef = useSvgDraw<SVGSVGElement>();
 
-    // If the image has not loaded within the timeout, fall back to the
-    // placeholder (Req 5.8).
-    const timeoutId = window.setTimeout(() => {
-      if (!loadedRef.current) {
-        setImageFailed(true);
-      }
-    }, IMAGE_LOAD_TIMEOUT_MS);
+  // --- Motion 3D tilt + glare (Req 7.1, 10.1). The pure `computeTilt` maps the
+  // pointer to bounded rotateX/rotateY + glare position/opacity; Motion only
+  // applies the result. Motion owns `transform` on the tilt node
+  // (`project-card-tilt`) and `opacity`/glare custom props on the glare overlay
+  // (`project-card-glare`) — both disjoint from the wrapper's entrance reveal.
+  const rotateX = useMotionValue(NEUTRAL_TILT.rotateX);
+  const rotateY = useMotionValue(NEUTRAL_TILT.rotateY);
+  const glareX = useMotionValue(NEUTRAL_TILT.glareX);
+  const glareY = useMotionValue(NEUTRAL_TILT.glareY);
+  const glareOpacity = useMotionValue(NEUTRAL_TILT.glareOpacity);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [imageUrl]);
+  // Smooth the rotation so the tilt eases toward the cursor and settles back to
+  // neutral on leave. The glare position tracks the pointer directly.
+  const springRotateX = useSpring(rotateX, TILT_SPRING);
+  const springRotateY = useSpring(rotateY, TILT_SPRING);
 
-  const displayedSrc = imageFailed ? placeholderImage : imageUrl;
+  // Express the glare center as CSS percentages for the radial-gradient.
+  const glareXPercent = useTransform(glareX, (value) => `${value * 100}%`);
+  const glareYPercent = useTransform(glareY, (value) => `${value * 100}%`);
+
+  const applyTilt = (output: typeof NEUTRAL_TILT): void => {
+    rotateX.set(output.rotateX);
+    rotateY.set(output.rotateY);
+    glareX.set(output.glareX);
+    glareY.set(output.glareY);
+    glareOpacity.set(output.glareOpacity);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLElement>): void => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    // `computeTilt` returns NEUTRAL_TILT under reduced motion regardless of the
+    // pointer, so the gate is centralized in the pure layer (Req 7.1).
+    applyTilt(
+      computeTilt(
+        { pointerX: event.clientX, pointerY: event.clientY, rect },
+        reducedMotion,
+      ),
+    );
+  };
+
+  const handlePointerEnter = (): void => setHovered(true);
+
+  const handlePointerLeave = (): void => {
+    setHovered(false);
+    // Settle the card back to its resting visual state (Req 5.3 spirit).
+    applyTilt(NEUTRAL_TILT);
+  };
+
+  // The thumbnail source: the project's static image, falling back to the
+  // bundled placeholder when no image URL is configured (Req 5.8). `VectorMedia`
+  // additionally fails visible to this same source on any media load error.
+  const fallbackSrc = imageUrl || placeholderImage;
+
+  // Tilt element style: Motion drives rotateX/rotateY (the `transform` channel)
+  // and the glare custom properties consumed by the overlay below. Custom CSS
+  // properties are not part of the typed style surface, so the object is cast.
+  const tiltStyle = {
+    rotateX: springRotateX,
+    rotateY: springRotateY,
+    transformStyle: 'preserve-3d',
+    '--glare-x': glareXPercent,
+    '--glare-y': glareYPercent,
+    '--glare-opacity': glareOpacity,
+  } as unknown as MotionStyle;
 
   return (
-    <li
-      ref={cardRef}
+    <motion.article
       tabIndex={0}
+      onPointerMove={handlePointerMove}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      style={tiltStyle}
       className={
-        'group flex h-full flex-col overflow-hidden rounded-lg border border-surface ' +
-        'bg-surface transition-all duration-200 ' +
+        'group relative flex h-full flex-col overflow-hidden rounded-lg border border-surface ' +
+        'bg-surface transition-colors duration-200 ' +
         'hover:border-accent hover:shadow-md ' +
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ' +
         'focus-visible:ring-offset-2 focus-visible:ring-offset-base'
       }
     >
-      {/* Project image. onError + load timeout swap in the placeholder while
-          all other content remains (Req 5.8). */}
-      <img
-        src={displayedSrc}
-        alt={`${title} preview`}
-        className="h-48 w-full bg-base object-cover"
-        onLoad={() => {
-          loadedRef.current = true;
-        }}
-        onError={() => {
-          if (!imageFailed) {
-            setImageFailed(true);
-          }
-        }}
-      />
+      {/* Thumbnail (Jitter media on hover, static poster/placeholder while idle).
+          VectorMedia fails visible to `fallbackSrc` on any media error (Req 5.8,
+          10.2, 10.4). */}
+      <div className="relative">
+        <VectorMedia
+          media={media}
+          fallbackSrc={fallbackSrc}
+          hovered={hovered}
+          alt={`${title} preview`}
+        />
+
+        {/* Glare overlay (Motion owns opacity + glare custom props on this node,
+            `project-card-glare`). Decorative, pointer-transparent. The radial
+            gradient center + intensity read the custom properties set above. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at var(--glare-x) var(--glare-y), rgba(255,255,255,0.35), transparent 55%)',
+            opacity: 'var(--glare-opacity)',
+          }}
+        />
+      </div>
 
       <div className="flex flex-1 flex-col gap-4 p-6">
-        {/* Title (Req 5.1). */}
-        <h3 className="text-xl font-bold text-ink">{title}</h3>
+        {/* Title + line-drawn Iconsax "view project" arrow (Req 5.1). */}
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-xl font-bold text-ink">{title}</h3>
+          <Icons.arrow
+            ref={arrowRef}
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-accent"
+          />
+        </div>
 
         {/* Description (Req 5.1). */}
-        <p className="text-base leading-relaxed text-ink/80 break-words">{description}</p>
+        <p className="text-base leading-relaxed text-ink/80 break-words">
+          {description}
+        </p>
 
         {/* Technology stack — every item rendered (Req 5.1). */}
         <ul className="flex flex-wrap gap-2">
@@ -143,8 +220,7 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
         </ul>
 
         {/* Action buttons. Configured URLs open in a new tab (Req 5.6); null
-            URLs render disabled and do not navigate (Req 5.7). Pushed to the
-            bottom so cards of differing heights align their actions. */}
+            URLs render disabled and do not navigate (Req 5.7). */}
         <div className="mt-auto flex gap-3 pt-2">
           <ExternalLink
             href={liveDemoUrl}
@@ -167,34 +243,43 @@ export function ProjectCard({ project }: ProjectCardProps): JSX.Element {
           </ExternalLink>
         </div>
       </div>
-    </li>
+    </motion.article>
   );
 }
+
+/** Per-card entrance stagger step (ms), reused from the default reveal config. */
+const CARD_STAGGER_MS = DEFAULT_REVEAL_CONFIG.staggerMs ?? 0;
 
 export function Projects({ projects }: ProjectsProps): JSX.Element {
   return (
     <section id="projects" className="bg-base py-16 sm:py-20">
-      <div className="mx-auto max-w-5xl px-4">
+      <div className="mx-auto max-w-6xl px-4">
         {/* Section entrance reveal (Motion owns opacity + transform). */}
         <RevealOnScroll as="div" className="mb-8 text-center">
           <h2 className="text-2xl font-bold text-ink sm:text-3xl">Projects</h2>
         </RevealOnScroll>
 
-        {/* One card per project (Req 5.1). The StaggerGroup renders the
-            multi-column grid container — a single column on mobile widening to
-            2–3 columns on larger/desktop viewports (Req 9.2, 9.3) — and reveals
-            each card in a staggered sequence (Req 4.2). `h-full` keeps each
-            card filling its grid cell so the layout matches the pre-animation
-            grid. */}
-        <StaggerGroup
-          as="ul"
-          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-          childClassName="h-full"
-        >
-          {projects.map((project) => (
-            <ProjectCard key={project.title} project={project} />
+        {/* Bento grid: one column on mobile, widening to 2 then 4 columns
+            (Req 9.3). Each card wrapper IS a grid item, carrying its per-variant
+            span classes (`mapVariantToSpanClasses`) plus the `perspective` that
+            the nested 3D-tilt article rotates within. `RevealOnScroll` reveals
+            each wrapper once with an incremental `index * staggerMs` delay so the
+            asymmetrical spans and the staggered entrance compose cleanly
+            (Req 4.2). `StaggerGroup` is not used here because it applies a single
+            `childClassName` to every child and so cannot assign the per-card
+            bento span the grid item requires. */}
+        <ul className={BENTO_GRID_CLASSES}>
+          {projects.map((project, index) => (
+            <RevealOnScroll
+              key={project.title}
+              as="li"
+              className={`${mapVariantToSpanClasses(project.variant)} [perspective:1000px]`}
+              delayMs={index * CARD_STAGGER_MS}
+            >
+              <ProjectCard project={project} />
+            </RevealOnScroll>
           ))}
-        </StaggerGroup>
+        </ul>
       </div>
     </section>
   );

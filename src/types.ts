@@ -1,4 +1,6 @@
 import type { ComponentType } from 'react';
+import type { ProjectCardVariant } from './lib/animation/bento';
+import type { ProjectMedia } from './lib/animation/media';
 
 /**
  * Shared TypeScript types for the personal portfolio website.
@@ -39,6 +41,16 @@ export interface Project {
   githubUrl: string | null;
   /** Live demo URL, or null when not configured (renders disabled). */
   liveDemoUrl: string | null;
+  /**
+   * Optional bento-grid layout variant for the Premium Project Card (Req 9.4).
+   * When absent, the card falls back to the `standard` span.
+   */
+  variant?: ProjectCardVariant;
+  /**
+   * Optional animated thumbnail (Lottie/MP4) with poster for the Premium
+   * Project Card. When absent, the card falls back to the static `imageUrl`.
+   */
+  media?: ProjectMedia;
 }
 
 /** A single experience timeline entry (Req 6.1). */

@@ -135,9 +135,10 @@ describe('Section components — decorative icons carry aria-hidden (Req 2.1, 2.
   it('Projects renders the Iconsax external-link icon plus GitHub glyph per card, decorative', () => {
     const { container } = render(<Projects projects={projects} />);
 
-    // Each card renders a Live Demo (externalLink, Iconsax) and a GitHub glyph.
+    // Each card renders a Live Demo (externalLink, Iconsax), a GitHub glyph, and
+    // the line-drawn "view project" arrow (Iconsax) — three decorative svgs.
     const svgs = expectAllIconsDecorative(container);
-    expect(svgs).toHaveLength(projects.length * 2);
+    expect(svgs).toHaveLength(projects.length * 3);
   });
 
   it('Contact renders the Iconsax email/location icons plus social glyphs, decorative', () => {

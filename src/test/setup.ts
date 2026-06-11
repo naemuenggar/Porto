@@ -67,3 +67,19 @@ if (typeof globalThis.cancelAnimationFrame !== 'function') {
     clearTimeout(handle as unknown as ReturnType<typeof setTimeout>);
   };
 }
+
+// --- SVGElement.getTotalLength (Anime.js SVG line-drawing) ------------------
+// jsdom does not implement `getTotalLength`, which Anime.js calls via
+// `anime.setDashoffset` to seed the stroke-dasharray for the line-draw effect
+// (`useSvgDraw`, e.g. the Premium Project Card "view project" arrow). Provide a
+// constant-length shim so the draw can initialize in tests without throwing.
+// _Requirements: 11.2_
+if (
+  typeof SVGElement !== 'undefined' &&
+  typeof (SVGElement.prototype as unknown as { getTotalLength?: unknown })
+    .getTotalLength !== 'function'
+) {
+  (
+    SVGElement.prototype as unknown as { getTotalLength: () => number }
+  ).getTotalLength = () => 0;
+}

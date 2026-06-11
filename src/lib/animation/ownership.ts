@@ -147,7 +147,20 @@ export const PROJECT_OWNERSHIP_REGISTRY: Ownership[] = [
   { elementId: 'hero-cta-secondary', engine: 'anime', properties: ['scale'] },
 
   // Projects (#projects): physics "lift" on each focusable project card.
-  { elementId: 'project-card', engine: 'anime', properties: ['translateY'] },
+  // --- Premium Project Card layers (task 12) ---
+  // The card is composed of separate nested DOM nodes so Motion and Anime.js
+  // never claim the same property on the same node (Req 3.3, 3.4). Motion owns
+  // the entrance reveal, the 3D tilt transform, and the glare overlay (opacity
+  // + glare CSS custom properties); Anime.js owns only the Iconsax SVG line
+  // draw via `strokeDashoffset` on a distinct icon node.
+  { elementId: 'project-card-reveal', engine: 'motion', properties: ['opacity', 'transform'] },
+  { elementId: 'project-card-tilt', engine: 'motion', properties: ['transform'] },
+  {
+    elementId: 'project-card-glare',
+    engine: 'motion',
+    properties: ['opacity', '--glare-x', '--glare-y', '--glare-opacity'],
+  },
+  { elementId: 'project-card-icon', engine: 'anime', properties: ['strokeDashoffset'] },
 
   // Contact (#contact): physics press feedback on the form submit control.
   { elementId: 'contact-submit', engine: 'anime', properties: ['scale'] },

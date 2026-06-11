@@ -151,6 +151,8 @@ export const projects: Project[] = [
     imageUrl: '/projects/ecommerce.png',
     githubUrl: 'https://github.com/naemuenggar/e-commerce',
     liveDemoUrl: null,
+    // Featured hero cell to showcase the bento layout (Req 9.3, 9.4).
+    variant: 'featured',
   },
   {
     title: 'SplitBillin – Split Bill App',
@@ -160,6 +162,8 @@ export const projects: Project[] = [
     imageUrl: '/projects/splitbill.png',
     githubUrl: 'https://github.com/naemuenggar/SplitBillin',
     liveDemoUrl: 'https://splitbillin.vercel.app/',
+    // Wide cell spanning two columns on larger viewports.
+    variant: 'wide',
   },
   {
     title: 'Mobile / Flutter App',
